@@ -6,6 +6,7 @@ import { AuditLogData } from "../mock/AuditLog";
 import Pagination from "@mui/material/Pagination";
 import AssignProposalModal from "../components/Warehouse/AssignProposalModal";
 import PrintOrderModal from "../components/Warehouse/PrintOrderModal";
+import EmployeesTab from "../components/Warehouse/EmployeesTab";
 
 const OrderDistribution = () => {
   const [tabOpen, setTabOpen] = useState("all");
@@ -44,6 +45,16 @@ const OrderDistribution = () => {
           >
             Cần chú ý
           </button>
+          <button
+            className={
+              tabOpen === "employees"
+                ? "rounded-md px-3 py-2 bg-red-700 text-white hover:bg-red-800 justify-center gap-1.5 font-bold"
+                : "rounded-md px-3 py-2 bg-white border border-gray-100 justify-center gap-1.5 font-medium hover:bg-red-700 hover:text-white "
+            }
+            onClick={() => setTabOpen("employees")}
+          >
+            Nhân viên
+          </button>
         </div>
       </div>
       {/* Recommend */}
@@ -72,9 +83,9 @@ const OrderDistribution = () => {
                 onClick={()=> setPrintOrderModalOpen(true)}
         >
           Xác nhận in mới
-        </button>
+        </button> 
       </div>
-      {tabOpen === "all" ? <AllOrder /> : <ProcessTab />}
+    {tabOpen === "all" ? <AllOrder /> : tabOpen ==="process" ? <ProcessTab setTabOpen={setTabOpen}/> : <EmployeesTab/>}
       {/* auditlog */}
       <div className="mt-6">
         <div className="items-center justify-between gap-2 rounded-t-lg border border-border bg-white px-4 py-3 text-xs font-semibold ">

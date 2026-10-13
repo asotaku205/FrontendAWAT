@@ -1,6 +1,8 @@
 import Pagination from "@mui/material/Pagination";
 import usePagination from "../../hooks/usePagination";
 import { UnassignOrderData } from "../../mock/UnassignOrderData";
+import { useState } from "react";
+import AssignProposalModal from "./AssignProposalModal";
 
 const Unassign = () => {
   const { currentData, totalPages, currentPage, onChangePage } = usePagination({
@@ -11,11 +13,17 @@ const Unassign = () => {
   const startItem = (currentPage - 1) * 5 + 1;
 
   const endItem = Math.min(currentPage * 5, UnassignOrderData.length);
+  const [isAssignProposalModalOpen, setAssignProposalModalOpen] =
+    useState(false);
+
   return (
     <>
-     <button className="rounded-md px-2 py-2 text-sm mb-2 border border-gray-100 justify-center gap-1.5 font-bold bg-red-700 text-white hover:bg-red-800 ">
-          Phân công tự động 
-        </button>
+      <button
+        className="rounded-md px-2 py-2 text-sm mb-2 border border-gray-100 justify-center gap-1.5 font-bold bg-red-700 text-white hover:bg-red-800 "
+        onClick={() => setAssignProposalModalOpen(true)}
+      >
+        Phân công tự động
+      </button>
       <div className="overflow-x-auto rounded-lg border border-border bg-white text-xs">
         <table className="w-full border-collapse text-left">
           <thead>
@@ -82,6 +90,11 @@ const Unassign = () => {
           </div>
         </div>
       </div>
+      {isAssignProposalModalOpen && (
+        <AssignProposalModal
+          setIsAgssignProposalModalOpen={setAssignProposalModalOpen}
+        />
+      )}
     </>
   );
 };

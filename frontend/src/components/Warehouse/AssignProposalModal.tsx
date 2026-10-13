@@ -35,7 +35,7 @@ const AssignProposalModal = ({setIsAgssignProposalModalOpen}: {setIsAgssignPropo
           <div className="mb-2 border rounded-md bg-white p-2 text-xs">
             <p className="font-bold">Đỗ Trần Anh Sơn</p>
             <p className="mt-1  text-gray-600">
-              Đơn hiện tại: 80 - Nhận thêm: +80
+              Đơn hiện tại: 80 - Nhận thêm: <span className=" font-bold text-green-800">+80</span>
             </p>
           </div>
           <div className="mb-2 border rounded-md bg-white p-2 text-xs">
