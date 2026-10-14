@@ -1,75 +1,61 @@
-# React + TypeScript + Vite
+# FrontendAWAT
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React, TypeScript, and Vite frontend for AWAT Logistics.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Copy `.env.example` to `.env.local`, then start the frontend:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```powershell
+Copy-Item .env.example .env.local
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Vite reads environment variables at startup/build time; restart the dev server
+after changing `.env.local`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Mock API and backend API
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The app uses the same HTTP API in both modes. During Vite development, MSW is
+enabled by default unless `VITE_USE_MOCKS=false`. Set it to `true` to enable
+MSW explicitly in any mode. In production builds, MSW is disabled unless the
+variable is explicitly set to `true`. When mocks are disabled, requests go to
+the real backend; `VITE_API_BASE_URL` is prepended to each endpoint.
 
+```dotenv
+VITE_USE_MOCKS=true
+VITE_API_BASE_URL=/api
 ```
+
+For a real backend, use for example:
+
+```dotenv
+VITE_USE_MOCKS=false
+VITE_API_BASE_URL=https://backend.example.com/api
+```
+
+The backend should expose these GET endpoints and return JSON with the indicated
+shapes:
+
+| Endpoint | Response |
+| --- | --- |
+| `/address-parse/options` | `{ city: string[], district: string[], region: string[], reliability: { label: string, value: string }[] }` |
+| `/address-parse/pending` | `PendingAddressDataType[]` |
+| `/address-parse/parsed` | `AddressParseDataType[]` |
+| `/blacklist/monitor` | `MonitorCustomer[]` |
+| `/delivery-date/orders` | `DeliveryOrder[]` |
+| `/telesale/records` | `TelesaleRecord[]` |
+| `/business-forecast/products` | `ForecastProduct[]` |
+| `/order-distribution/options` | `{ locations: string[], statuses: string[], employeeStatuses: string[], employees: string[], batches: string[] }` |
+| `/order-distribution/orders/assigned` | `DistributionOrder[]` |
+| `/order-distribution/orders/unassigned` | `DistributionOrder[]` |
+| `/order-distribution/audit-log` | `AuditLogRecord[]` |
+| `/order-distribution/exceptions` | `ExceptionOrder[]` |
+| `/order-distribution/workers` | `WorkerProgress[]` |
+| `/order-distribution/ready-orders` | `ReadyOrdersSummary` |
+| `/order-distribution/recommendation` | `DistributionRecommendation` |
+| `/order-distribution/print-request` | `PrintRequest` |
+| `/order-distribution/employees` | `WarehouseEmployee[]` |
+
+MSW handlers are in `src/mocks/handlers.ts`; keep their response contracts in
+sync with the backend API.

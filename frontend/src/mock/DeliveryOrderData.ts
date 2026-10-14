@@ -1,15 +1,6 @@
-type DeliveryOrderDataType = {
-  orderCode: string;
-  customerName: string;
-  product:string,
-  carrier: string;
-  station: string;
-  status: "Đang vận chuyển"|"Trễ hạn"|"Sắp đến nơi";
-  eta: string;
-  timeCall: string;
-  callStatus: "Đã gọi xong"|"Chưa gọi"|"Cần gọi ngay";
-};
-export const DeliveryOrderData: DeliveryOrderDataType[] = [
+import type { DeliveryOrder } from "../services/types";
+
+export const DeliveryOrderData: DeliveryOrder[] = [
     {
 
 orderCode: "VC-002",

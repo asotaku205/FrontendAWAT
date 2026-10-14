@@ -1,15 +1,6 @@
-type TelesaleDataType = {
-    phoneNumber:number,
-    orderCode:string,
-    product:string,
-    problem:string,
-    customerName:string,
-    address:string,
-    dateCreated:string,
-    status:"Chưa gọi" | "Thành công" | "Thất bại",
-    staffName:string
-}
-export const TelesaleData:TelesaleDataType[] =[
+import type { TelesaleRecord } from "../services/types";
+
+export const TelesaleData: TelesaleRecord[] = [
     {
     phoneNumber:84901234567,
     orderCode:"067700-9481",

@@ -1,11 +1,29 @@
-import ParsedAddress from "../components/AddressParse/ParsedAddress";
-import PendingAddress from "../components/AddressParse/PendingAddress";
-import SearchInput from "../components/SearchInput";
+import ParsedAddress from "./address-parse/components/ParsedAddress";
+import PendingAddress from "./address-parse/components/PendingAddress";
+import SearchInput from "../components/ui/SearchInput";
 import { useState } from "react";
+import { Button } from "../components/ui/button";
+import DateInput from "../components/ui/DateInput";
+import Filter from "../components/ui/Filter";
+import SelectOption from "../components/ui/SelectOption";
+import useApiData from "../hooks/useApiData";
+import { API_ENDPOINTS } from "../services/api";
+import type { AddressParseOptions } from "../services/types";
 
 const AddressParse = () => {
   const [isAdvanceSearchOpen, setIsAdvanceSearchOpen] = useState(false);
   const [tabOpen, setTabOpen] = useState("pending");
+  const { data: addressOptions, error, isLoading } =
+    useApiData<AddressParseOptions>(API_ENDPOINTS.addressParse.options);
+
+  if (isLoading) return <p role="status">Đang tải tùy chọn địa chỉ...</p>;
+  if (error || !addressOptions) {
+    return (
+      <p role="alert">
+        Không tải được tùy chọn địa chỉ: {error ?? "Phản hồi API không hợp lệ."}
+      </p>
+    );
+  }
 
   return (
     <>
@@ -14,7 +32,8 @@ const AddressParse = () => {
         Phân tách địa chỉ
       </div>
       <div className="gap-1 rounded-lg p-1 mb-3 border-b border-gray-300">
-        <button
+        <Button
+          variant="ghost"
           className={
             tabOpen === "pending"
               ? "rounded-md  px-5 py-2 bg-white text-red-800 font-bold "
@@ -23,8 +42,9 @@ const AddressParse = () => {
           onClick={() => setTabOpen("pending")}
         >
           Chờ tách địa chỉ
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="ghost"
           className={
             tabOpen === "parsed"
               ? "rounded-md  px-5 py-2 bg-white text-red-800 font-bold "
@@ -33,56 +53,53 @@ const AddressParse = () => {
           onClick={() => setTabOpen("parsed")}
         >
           Xác nhận địa chỉ
-        </button>
+        </Button>
       </div>
       {/* Tìm kiếm và lọc */}
-      <div className=" border-b mb-2 border-gray-300 p-4 text-xs bg-white rounded ">
-        <div className="flex gap-4">
+      <Filter
+        className="mb-2 text-xs"
+        onReset={() => setIsAdvanceSearchOpen(false)}
+      >
+        <div className="flex flex-wrap items-center gap-4">
           <SearchInput placeholder="Tìm kiếm mã đơn, địa chỉ..." />
-          <button
-            className="rounded-lg border border-gray-300 p-2 hover:bg-gray-100"
+          <Button
+            type="button"
+            color="#ffffff"
+            className="border border-gray-300 text-gray-700 hover:bg-gray-100"
             onClick={() => setIsAdvanceSearchOpen(!isAdvanceSearchOpen)}
-          >
-            Lọc nâng cao
-          </button>
+            title={isAdvanceSearchOpen ? "Ẩn bộ lọc" : "Lọc nâng cao"}
+          />
         </div>
-        <div className="flex gap-4 mt-2">
-          {isAdvanceSearchOpen &&  (
-            
+        {isAdvanceSearchOpen && (
+          <div className="flex flex-wrap gap-4">
             <>
-            {tabOpen === "parsed" &&(
-              <>
-              <div className="flex flex-col gap-2 ">
-                <span className="text-gray-600">Độ tin cậy</span>
-                <select className="rounded-lg border border-gray-300 p-2">
-                  <option value="">Tất cả độ tin cậy</option>
-                  <option value="high">Cao {">"}= 95%</option>
-                  <option value="medium">Trung bình 75% - 94%</option>
-                  <option value="low">Thấp {"<"} 75%</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-2 ">
-                <span className="text-gray-600">Tỉnh/Thành phố</span>
-                <select className="rounded-lg border border-gray-300 p-2">
-                  <option value="">Tất cả tỉnh/thành phố</option>
-                </select>
-              </div>
-              </>
-            )}
-              <div className="flex flex-col gap-2 ">
-                <span className="text-gray-600">Ngày tạo đơn</span>
-                <input
-                  type="date"
-                  className="rounded-lg border border-gray-300 p-2"
-                />
-              </div>
-
+              {tabOpen === "parsed" && (
+                <>
+                  <SelectOption
+                    title="Độ tin cậy"
+                    placeholder="Tất cả độ tin cậy"
+                    option={addressOptions.reliability}
+                    isFilter
+                  />
+                  <SelectOption
+                    title="Tỉnh/Thành phố"
+                    placeholder="Tất cả tỉnh/thành phố"
+                    option={addressOptions.city}
+                    isFilter
+                  />
+                </>
+              )}
+              <DateInput title="Ngày tạo đơn" />
             </>
-         )}
-        </div>
-      </div>
+          </div>
+        )}
+      </Filter>
       {/* Trang chờ tách và đẫ tách */}
-      {tabOpen === "pending" ? <PendingAddress /> : <ParsedAddress />}
+      {tabOpen === "pending" ? (
+        <PendingAddress addressOptions={addressOptions} />
+      ) : (
+        <ParsedAddress addressOptions={addressOptions} />
+      )}
     </>
   );
 };

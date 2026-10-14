@@ -1,13 +1,6 @@
-type EmployeesDataType = {
-  employees: string;
-  currentBlock: number;
-  completedOrder: number;
-  remainingOrder: number;
-  performance: number;
-  eta: number;
-  status: "Đang thực hiện" | "Nghỉ đột xuất" | "In thêm";
-};
-export const EmployeesData: EmployeesDataType[] = [
+import type { WarehouseEmployee } from "../services/types";
+
+export const EmployeesData: WarehouseEmployee[] = [
   {
     employees: "Đỗ Trần Anh Sơn",
     currentBlock: 80,

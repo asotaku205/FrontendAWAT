@@ -1,22 +1,33 @@
 import { useState } from "react";
-import SearchInput from "../components/SearchInput";
-import Pagination from "@mui/material/Pagination";
+import SearchInput from "../components/ui/SearchInput";
+import Pagination from "../components/ui/Pagination";
+import useApiData from "../hooks/useApiData";
 import usePagination from "../hooks/usePagination";
-import { DeliveryOrderData } from "../mock/DeliveryOrderData";
-import DeliveryOderModal from "../components/DeliveryDate/DeliveryOderModal";
+import { API_ENDPOINTS } from "../services/api";
+import type { DeliveryOrder } from "../services/types";
+import DeliveryOderModal from "./delivery-date/components/DeliveryOderModal";
 
 const DeliveryDate = () => {
   const [isAdvanceSearchOpen, setIsAdvanceSearchOpen] = useState(false);
-  const { currentData, totalPages, currentPage, onChangePage } = usePagination({
-    data: [...DeliveryOrderData],
+  const { data, error, isLoading } = useApiData<DeliveryOrder[]>(
+    API_ENDPOINTS.deliveryOrders,
+  );
+  const deliveryOrders = data ?? [];
+  const { currentData, totalPages, currentPage, setCurrentPage } = usePagination({
+    data: deliveryOrders,
     pageSize: 5,
   });
 
   const startItem = (currentPage - 1) * 5 + 1;
 
-  const endItem = Math.min(currentPage * 5, DeliveryOrderData.length);
+  const endItem = Math.min(currentPage * 5, deliveryOrders.length);
 
   const [isDeliveryOrderModalOpen, setDeliveryOrderModalOpen] = useState(false);
+
+  if (isLoading) return <p role="status">Đang tải danh sách đơn giao hàng...</p>;
+  if (error) {
+    return <p role="alert">Không tải được danh sách đơn giao hàng: {error}</p>;
+  }
 
   return (
     <>
@@ -224,16 +235,15 @@ const DeliveryDate = () => {
             </span>{" "}
             /
             <span className="font-medium text-gray-600">
-              {DeliveryOrderData.length}
+              {deliveryOrders.length}
             </span>{" "}
             bản ghi
           </span>
           <div className="flex items-center gap-1">
             <Pagination
-              count={totalPages}
               page={currentPage}
-              shape="rounded"
-              onChange={onChangePage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
             />
           </div>
         </div>

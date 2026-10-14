@@ -1,27 +1,9 @@
-export type AddressParseDataType = {
-  orderCode: string;
-  customerName: string;
-  phoneNumber: string;
-  originalAddress: string;
-  city: string;
-  cityReliable:number;
-  district: string;
-  districtReliable:number;
-  region: string;
-  regionReliable: number;
-  detailedAddress: string;
-  dateCreated: string;
-  reliability: number;
-  status: "Chưa xác nhận" | "Đã xác nhận" | "Lỗi phân tách";
-};
-type PendingAddressDataType = {
-  orderCode: string;
-  customerName: string;
-  phoneNumber: string;
-  originalAddress: string;
-  dateCreated: string;
-  status: "Chờ phân tách";
-};
+import type {
+  AddressParseDataType,
+  PendingAddressDataType,
+} from "../services/types";
+
+export type { AddressParseDataType, PendingAddressDataType } from "../services/types";
 export const city = [
   "Hà Nội",
   "Hồ Chí Minh",
@@ -36,6 +18,11 @@ export const region = [
   "Phường 3",
   "Phường 4",
   "Phường 5",
+];
+export const reliabilityOptions = [
+  { label: "Cao >= 95%", value: "high" },
+  { label: "Trung bình 75% - 94%", value: "medium" },
+  { label: "Thấp < 75%", value: "low" },
 ];
 
 export const AddressParseData: AddressParseDataType[] = [

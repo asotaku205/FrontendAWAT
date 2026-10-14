@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 
-const usePagination = ({
+const usePagination = <T,>({
   data,
   pageSize,
 }: {
-  data: any[];
+  data: T[];
   pageSize: number;
 }) => {
   const [currentPage, setCurrentPage] = useState(1);

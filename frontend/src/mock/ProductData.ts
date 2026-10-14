@@ -1,15 +1,6 @@
-type ProductDataType = {
-    product:string,
-    orderCode:string,
-    ecommerce:string[],
-    stock:number,
-    processing:number,
-    fillRate:number,
-    aiRecommend:string,
-    reason:string,
-    status:"Đã xác nhận" | "Chưa xác nhận"
-}
-export const ProductData:ProductDataType[] =[
+import type { ForecastProduct } from "../services/types";
+
+export const ProductData: ForecastProduct[] = [
     {
         product:"Bugi Xe Máy IUF22 Chân Ngắn DENSO Iridium",
         orderCode:"067700-9481",
