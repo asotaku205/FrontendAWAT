@@ -1,3 +1,5 @@
+import { Button } from "../../../components/ui/button";
+
 const DeliveryOderModal = ({
   setDeliveryOrderModalOpen,
 }: {
@@ -68,19 +70,19 @@ const DeliveryOderModal = ({
             </label>
           </div>
           <div className="flex flex-wrap justify-end gap-2 border-t border-border bg-gray-50 px-5 py-4">
-            <button
+            <Button
               type="button"
-              className="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-3.5 font-medium   bg-white hover:bg-gray-50 "
+              variant={"outline"}
               onClick={() => setDeliveryOrderModalOpen(false)}
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-3.5 font-medium bg-red-700 text-white  hover:bg-red-800 "
+              variant={"default"}
             >
               Lưu cập nhật
-            </button>
+            </Button>
           </div>
         </div>
       </section>

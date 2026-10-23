@@ -18,6 +18,7 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => {
   );
 
   return (
+    
     <nav aria-label="Phân trang" className="flex items-center gap-2">
       <Button
         type="button"

@@ -75,7 +75,7 @@ export const ReadyOrders = ({ onViewAll }: { onViewAll: () => void }) => {
           <p className="mt-3">Đợt xuất hàng tiếp theo: {summary.nextDispatch}</p>
           <Button
             type="button"
-            className="mt-5 bg-white shadow-xs hover:bg-gray-50"
+            className="mt-5 bg-white text-black shadow-xs border-border hover:bg-gray-50"
             onClick={onViewAll}
           >
             Xem chi tiết {summary.count} đơn sẵn sàng giao

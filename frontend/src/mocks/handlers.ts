@@ -8,7 +8,6 @@ import {
   reliabilityOptions,
   region,
 } from "../mock/AddressParseData";
-import { MonitorCustomerData } from "../mock/BlacklistData";
 import { AssignedOrderData } from "../mock/AssignedOrderData";
 import { AuditLogData } from "../mock/AuditLog";
 import { UnassignOrderData } from "../mock/UnassignOrderData";
@@ -39,9 +38,6 @@ export const handlers = [
   ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.addressParse.parsed}`, () =>
     HttpResponse.json(AddressParseData),
-  ),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.blacklistMonitor}`, () =>
-    HttpResponse.json(MonitorCustomerData),
   ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.deliveryOrders}`, () =>
     HttpResponse.json(DeliveryOrderData),

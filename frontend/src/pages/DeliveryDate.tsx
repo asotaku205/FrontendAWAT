@@ -6,25 +6,45 @@ import usePagination from "../hooks/usePagination";
 import { API_ENDPOINTS } from "../services/api";
 import type { DeliveryOrder } from "../services/types";
 import DeliveryOderModal from "./delivery-date/components/DeliveryOderModal";
-
+import type { TableColumn } from "../components/ui/Table";
+import Table from "../components/ui/Table";
+import { Button } from "../components/ui/button";
+const deliveryColumns: TableColumn<DeliveryOrder>[] = [
+  { key: "orderCode", title: "Mã đơn" },
+  { key: "customerName", title: "Khách hàng" },
+  { key: "product", title: "Sản phẩm" },
+  {
+    key: "carrier",
+    title: "Đơn vị vận chuyển",
+  },
+  {
+    key: "station",
+    title: "Trạm",
+  },
+  {
+    key: "status",
+    title: "Trạng thái",
+  },
+  { key: "eta", title: "ETA" },
+  { key: "timeCall", title: "Khung gọi tối ưu" },
+  { key: "callStatus", title: "Trạng thái gọi" },
+];
 const DeliveryDate = () => {
   const [isAdvanceSearchOpen, setIsAdvanceSearchOpen] = useState(false);
   const { data, error, isLoading } = useApiData<DeliveryOrder[]>(
     API_ENDPOINTS.deliveryOrders,
   );
   const deliveryOrders = data ?? [];
-  const { currentData, totalPages, currentPage, setCurrentPage } = usePagination({
-    data: deliveryOrders,
-    pageSize: 5,
-  });
-
-  const startItem = (currentPage - 1) * 5 + 1;
-
-  const endItem = Math.min(currentPage * 5, deliveryOrders.length);
+  const { currentData, totalPages, currentPage, setCurrentPage } =
+    usePagination({
+      data: deliveryOrders,
+      pageSize: 5,
+    });
 
   const [isDeliveryOrderModalOpen, setDeliveryOrderModalOpen] = useState(false);
 
-  if (isLoading) return <p role="status">Đang tải danh sách đơn giao hàng...</p>;
+  if (isLoading)
+    return <p role="status">Đang tải danh sách đơn giao hàng...</p>;
   if (error) {
     return <p role="alert">Không tải được danh sách đơn giao hàng: {error}</p>;
   }
@@ -41,19 +61,19 @@ const DeliveryDate = () => {
             - Cần kiểm tra & chuyển Telesale
           </span>
         </p>
-        <button className="rounded-md px-3 py-2 border border-gray-100 justify-center gap-1.5 font-bold bg-red-700 text-white hover:bg-red-800 ">
+        <Button>
           Xem đơn cần xử lý gấp
-        </button>
+        </Button>
       </div>
       <div className=" border-b mb-2 border-gray-300 p-4 text-xs bg-white rounded ">
         <div className="flex gap-4">
           <SearchInput placeholder="Tìm kiếm mã đơn, địa chỉ..." />
-          <button
-            className="rounded-lg border border-gray-300 p-2 hover:bg-gray-100"
+          <Button
+          variant={"outline"}
             onClick={() => setIsAdvanceSearchOpen(!isAdvanceSearchOpen)}
           >
             Lọc nâng cao
-          </button>
+          </Button>
         </div>
         <div className="flex gap-4 mt-2">
           {isAdvanceSearchOpen && (
@@ -161,94 +181,24 @@ const DeliveryDate = () => {
         Danh sách đơn đang giao
       </div>
       <div className="overflow-x-auto rounded-lg border border-border bg-white text-xs">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="bg-gray-100 text-gray-800">
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Mã đơn
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Khách hàng
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Sản phẩm
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Đơn vị vận chuyển
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Trạm
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Trạng thái
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                ETA
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Khung gọi tối ưu
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Trạng thái gọi
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.map((data) => (
-              <tr>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.orderCode}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.customerName}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.product}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.carrier}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.station}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.status}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.eta}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.timeCall}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.callStatus}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-          <span className="text-xs text-gray-400">
-            Hiển thị{" "}
-            <span className="font-medium text-gray-600">
-              {startItem}-{endItem}
-            </span>{" "}
-            /
-            <span className="font-medium text-gray-600">
-              {deliveryOrders.length}
-            </span>{" "}
-            bản ghi
-          </span>
-          <div className="flex items-center gap-1">
-            <Pagination
-              page={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        </div>
+        <Table
+          columns={deliveryColumns}
+          records={currentData}
+          rowKey="orderCode"
+          pagination={{
+            page: currentPage,
+            pageSize: 5,
+            totalPages,
+            totalRecords: currentData.length,
+            onPageChange: setCurrentPage,
+          }}
+        />
       </div>
-      {isDeliveryOrderModalOpen && <DeliveryOderModal setDeliveryOrderModalOpen={setDeliveryOrderModalOpen}/>}
+      {isDeliveryOrderModalOpen && (
+        <DeliveryOderModal
+          setDeliveryOrderModalOpen={setDeliveryOrderModalOpen}
+        />
+      )}
     </>
   );
 };

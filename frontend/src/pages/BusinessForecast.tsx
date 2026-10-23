@@ -1,56 +1,49 @@
-import Table, { type TableColumn } from "../components/ui/Table";
-import useApiData from "../hooks/useApiData";
-import usePagination from "../hooks/usePagination";
-import { API_ENDPOINTS } from "../services/api";
-import type { ForecastProduct } from "../services/types";
+import { useState } from "react";
+import TabOverview from "./business-forecast/TabOverview";
+import TabReal from "./business-forecast/TabReal";
+import TabForecast from "./business-forecast/TabForecast";
+import TabChannel from "./business-forecast/TabChannel";
+import TabCustomer from "./business-forecast/TabCustomer";
+import TabStock from "./business-forecast/TabStock";
+import TabWarning from "./business-forecast/TabWarning";
+import TabActivity from "./business-forecast/TabActivity";
+import { Button } from "../components/ui/button";
 
-const pageSize = 5;
-
-const columns: TableColumn<ForecastProduct>[] = [
-  { key: "product", title: "Sản phẩm", className: "min-w-64" },
-  { key: "orderCode", title: "Mã đơn" },
-  {
-    key: "ecommerce",
-    title: "Kênh bán",
-    render: ({ ecommerce }) => ecommerce.join(", "),
-  },
-  { key: "stock", title: "Tồn kho" },
-  { key: "processing", title: "Đang xử lý" },
-  { key: "fillRate", title: "Tỷ lệ đáp ứng", render: ({ fillRate }) => `${fillRate}%` },
-  { key: "aiRecommend", title: "AI đề xuất" },
-  { key: "status", title: "Trạng thái" },
-  { key: "reason", title: "Lý do", className: "min-w-64" },
+const tabs = [
+  { id: "overview", label: "Tổng quan", content: <TabOverview /> },
+  { id: "real", label: "Thực tế", content: <TabReal /> },
+  { id: "forecast", label: "Dự báo", content: <TabForecast /> },
+  { id: "channel", label: "Kênh bán", content: <TabChannel /> },
+  { id: "stock", label: "Tồn kho", content: <TabStock /> },
+  { id: "customer", label: "Khách hàng", content: <TabCustomer /> },
+  { id: "warning", label: "Cảnh báo", content: <TabWarning /> },
+  { id: "activity", label: "Hoạt động", content: <TabActivity /> },
 ];
 
 const BusinessForecast = () => {
-  const { data, error, isLoading } = useApiData<ForecastProduct[]>(
-    API_ENDPOINTS.forecastProducts,
-  );
-  const records = data ?? [];
-  const { currentData, currentPage, totalPages, setCurrentPage } = usePagination({
-    data: records,
-    pageSize,
-  });
-
-  if (isLoading) return <p role="status">Đang tải dự báo kinh doanh...</p>;
-  if (error) return <p role="alert">Không tải được dự báo kinh doanh: {error}</p>;
+  const [activeTab, setActiveTab] = useState("overview");
+  const active = tabs.find((t) => t.id === activeTab)!;
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-lg font-bold">Dự đoán kinh doanh</h1>
-      <Table
-        columns={columns}
-        records={currentData}
-        tableClassName="min-w-max"
-        pagination={{
-          page: currentPage,
-          pageSize,
-          totalPages,
-          totalRecords: records.length,
-          onPageChange: setCurrentPage,
-        }}
-      />
-    </section>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {tabs.map((t) => (
+          <Button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            className={` ${
+              activeTab === t.id
+                ? "bg-red-700 text-white"
+                : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            {t.label}
+          </Button>
+        ))}
+      </div>
+      {/* tab content */}
+      {active.content}
+    </div>
   );
 };
 
