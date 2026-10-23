@@ -6,10 +6,12 @@ import {
   BriefcaseBusiness,
   CalendarClock,
   ChevronDown,
-  Headset,
+  User,
   LayoutDashboard,
   MapPinHouse,
+  PhoneCall,
   Truck,
+  Headphones
 } from "lucide-react";
 import logo from "../assets/Denso_logo.svg";
 import { Button } from "../components/ui/button";
@@ -28,7 +30,14 @@ const menuItems: MenuItem[] = [
     children: [
       { title: "Dự đoán kinh doanh", path: "/business-forecast", icon: BriefcaseBusiness },
       { title: "Phân tách địa chỉ", path: "/address-parse", icon: MapPinHouse },
-      { title: "Phân phối telesale", path: "/telesale", icon: Headset },
+      { title: "Phân phối telesale",
+        children: [
+          { title: "Tổng quan", path: "/telesale/dashboard", icon: LayoutDashboard },
+          { title: "Nhân viên", path: "/telesale", icon: User },
+          { title: "Chia đơn", path: "/telesale/split", icon: Headphones },
+          { title: "Công việc của tôi", path: "/telesale/work", icon: PhoneCall },
+        ],
+      },
       { title: "Blacklist và Hoàn hàng", path: "/blacklist", icon: Ban },
       { title: "Phân phối đơn hàng", path: "/order-distribution", icon: Truck },
       { title: "Dự đoán ngày giao", path: "/delivery-date", icon: CalendarClock },
@@ -39,9 +48,10 @@ const menuItems: MenuItem[] = [
 type MenuTreeItemProps = {
   item: MenuItem;
   depth?: number;
+  onNavigate: () => void;
 };
 
-const MenuTreeItem = ({ item, depth = 0 }: MenuTreeItemProps) => {
+const MenuTreeItem = ({ item, depth = 0, onNavigate }: MenuTreeItemProps) => {
   const [expanded, setExpanded] = useState(true);
   const Icon = item.icon;
   const hasChildren = Boolean(item.children?.length);
@@ -70,7 +80,7 @@ const MenuTreeItem = ({ item, depth = 0 }: MenuTreeItemProps) => {
     );
   } else if (item.path) {
     content = (
-      <NavLink to={item.path} end={item.path === "/"} className={itemClassName}>
+      <NavLink to={item.path} end className={itemClassName} onClick={onNavigate}>
         {Icon && <Icon aria-hidden="true" size={18} />}
         <span>{item.title}</span>
       </NavLink>
@@ -85,7 +95,12 @@ const MenuTreeItem = ({ item, depth = 0 }: MenuTreeItemProps) => {
       {hasChildren && expanded && (
         <ul className="mt-1 flex flex-col gap-1">
           {item.children?.map((child) => (
-            <MenuTreeItem key={child.path ?? child.title} item={child} depth={depth + 1} />
+            <MenuTreeItem
+              key={child.path ?? child.title}
+              item={child}
+              depth={depth + 1}
+              onNavigate={onNavigate}
+            />
           ))}
         </ul>
       )}
@@ -97,22 +112,37 @@ type NavbarProps = {
   items?: MenuItem[];
   logoSrc?: string;
   brandName?: string;
+  isOpen: boolean;
+  onNavigate: () => void;
 };
 
 const Navbar = ({
   items = menuItems,
   logoSrc = logo,
-  brandName = "Logistic Dashboard",
+  brandName = "Denso",
+  isOpen,
+  onNavigate,
 }: NavbarProps) => (
-  <aside className="flex min-h-screen w-60 shrink-0 flex-col border-r border-gray-200 bg-white p-3">
-    <NavLink to="/" className="flex items-center gap-3 border-b border-gray-200 px-2 pb-5 pt-2">
+  <aside
+    id="primary-navigation"
+    className={`${isOpen ? "block md:flex" : "hidden"} fixed inset-x-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-gray-200 bg-white p-3 shadow-lg md:static md:min-h-screen md:max-h-none md:w-60 md:shrink-0 md:flex-col md:border-b-0 md:border-r md:shadow-none`}
+  >
+    <NavLink
+      to="/"
+      onClick={onNavigate}
+      className="flex items-center gap-3 border-b border-gray-200 px-2 pb-5 pt-2"
+    >
       <img src={logoSrc} alt="Denso" className="h-9 w-auto max-w-20 object-contain" />
       <span className="text-sm font-bold text-gray-900">{brandName}</span>
     </NavLink>
     <nav aria-label="Danh mục chính" className="mt-5 flex-1">
       <ul className="flex flex-col gap-1">
         {items.map((item) => (
-          <MenuTreeItem key={item.path ?? item.title} item={item} />
+          <MenuTreeItem
+            key={item.path ?? item.title}
+            item={item}
+            onNavigate={onNavigate}
+          />
         ))}
       </ul>
     </nav>

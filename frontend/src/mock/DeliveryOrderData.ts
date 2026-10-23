@@ -1,96 +1,106 @@
-import type { DeliveryOrder } from "../services/types";
+import type { DeliveryOrder, DeliveryRouteStop } from "../services/types";
+
+const routeFor = (station: string, eta: string): DeliveryRouteStop[] => [
+  {
+    location: "Kho Denso",
+    description: "06:30 - Xuất kho",
+    status: "completed",
+  },
+  {
+    location: station,
+    description: "Đang tại trạm",
+    status: "current",
+  },
+  {
+    location: "Địa chỉ khách hàng",
+    description: `Dự kiến ${eta}`,
+    status: "upcoming",
+  },
+];
 
 export const DeliveryOrderData: DeliveryOrder[] = [
-    {
-
-orderCode: "VC-002",
-  customerName: "Trần Thị Mai",
-  product:"Bugi DENSO IKH20TT",
-  carrier: "GHTK",
-  station: "Hà Đông",
-  status: "Sắp đến nơi",
-  eta: "10:15",
-  timeCall: "07:15-08:15",
-  callStatus: "Đã gọi xong"
-
-},
-{
-
-orderCode: "VC-004",
-  customerName: "Nguyễn Văn Hùng",
-  product:"Bơm xăng DENSO",
-  carrier: "VNPost",
-  station: "Hà Đông",
-  status: "Trễ hạn",
-  eta: "14:30",
-  timeCall: "12:30-13:30",
-  callStatus: "Cần gọi ngay"
-
-},
-{
-
-orderCode: "VC-003",
-  customerName: "Trần Thị Mai",
-  product:"Cảm biến oxy DENSO",
-  carrier: "GHN",
-  station: "Cầu Giấy",
-  status: "Đang vận chuyển",
-  eta: "15:00",
-  timeCall: "13:00-14:00",
-  callStatus: "Chưa gọi"
-
-},
-{
-
-orderCode: "VC-001",
-  customerName: "Trần Thị Mai",
-  product:"Bộ lọc dầu DENSO",
-  carrier: "GHTK",
-  station: "Hoàn Kiếm",
-  status: "Đang vận chuyển",
-  eta: "17:30",
-  timeCall: "15:30-16:30",
-  callStatus: "Chưa gọi"
-
-},
-{
-
-orderCode: "VC-007",
-  customerName: "Trần Thị Mai",
-  product:"Bugi DENSO IKH20TT",
-  carrier: "GHTK",
-  station: "Hà Đông",
-  status: "Đang vận chuyển",
-  eta: "18:45",
-  timeCall: "16:4517:45",
-  callStatus: "Chưa gọi"
-
-},
-{
-
-orderCode: "VC-005",
-  customerName: "Trần Thị Mai",
-  product:"Bugi DENSO IKH20TT",
-  carrier: "GHTK",
-  station: "Hà Đông",
-  status: "Đang vận chuyển",
-  eta: "10:15",
-  timeCall: "07:15-08:15",
-  callStatus: "Đã gọi xong"
-
-},
-{
-
-orderCode: "VC-006",
-  customerName: "Trần Thị Mai",
-  product:"Bugi DENSO IKH20TT",
-  carrier: "GHTK",
-  station: "Hà Đông",
-  status: "Đang vận chuyển",
-  eta: "10:15",
-  timeCall: "07:15-08:15",
-  callStatus: "Đã gọi xong"
-
-}
-  
+  {
+    orderCode: "VC-002",
+    customerName: "Trần Thị Mai",
+    product: "Bugi DENSO IKH20TT",
+    carrier: "GHTK",
+    station: "Hà Đông",
+    status: "Sắp đến nơi",
+    eta: "10:15",
+    timeCall: "07:15-08:15",
+    callStatus: "Đã gọi xong",
+    routeStops: routeFor("Hà Đông", "10:15"),
+  },
+  {
+    orderCode: "VC-004",
+    customerName: "Nguyễn Văn Hùng",
+    product: "Bơm xăng DENSO",
+    carrier: "VNPost",
+    station: "Hà Đông",
+    status: "Trễ hạn",
+    eta: "14:30",
+    timeCall: "12:30-13:30",
+    callStatus: "Cần gọi ngay",
+    routeStops: routeFor("Hà Đông", "14:30"),
+  },
+  {
+    orderCode: "VC-003",
+    customerName: "Trần Thị Mai",
+    product: "Cảm biến oxy DENSO",
+    carrier: "GHN",
+    station: "Cầu Giấy",
+    status: "Đang vận chuyển",
+    eta: "15:00",
+    timeCall: "13:00-14:00",
+    callStatus: "Chưa gọi",
+    routeStops: routeFor("Cầu Giấy", "15:00"),
+  },
+  {
+    orderCode: "VC-001",
+    customerName: "Trần Thị Mai",
+    product: "Bộ lọc dầu DENSO",
+    carrier: "GHTK",
+    station: "Hoàn Kiếm",
+    status: "Đang vận chuyển",
+    eta: "17:30",
+    timeCall: "15:30-16:30",
+    callStatus: "Chưa gọi",
+    routeStops: routeFor("Hoàn Kiếm", "17:30"),
+  },
+  {
+    orderCode: "VC-007",
+    customerName: "Trần Thị Mai",
+    product: "Bugi DENSO IKH20TT",
+    carrier: "GHTK",
+    station: "Hà Đông",
+    status: "Đang vận chuyển",
+    eta: "18:45",
+    timeCall: "16:45-17:45",
+    callStatus: "Chưa gọi",
+    routeStops: routeFor("Hà Đông", "18:45"),
+  },
+  {
+    orderCode: "VC-005",
+    customerName: "Trần Thị Mai",
+    product: "Bugi DENSO IKH20TT",
+    carrier: "GHTK",
+    station: "Hà Đông",
+    status: "Đang vận chuyển",
+    eta: "10:15",
+    timeCall: "07:15-08:15",
+    callStatus: "Đã gọi xong",
+    routeStops: routeFor("Hà Đông", "10:15"),
+  },
+  {
+    orderCode: "VC-006",
+    customerName: "Trần Thị Mai",
+    product: "Bugi DENSO IKH20TT",
+    carrier: "GHTK",
+    station: "Hà Đông",
+    status: "Đang vận chuyển",
+    eta: "10:15",
+    timeCall: "07:15-08:15",
+    callStatus: "Đã gọi xong",
+    routeStops: routeFor("Hà Đông", "10:15"),
+  },
 ];

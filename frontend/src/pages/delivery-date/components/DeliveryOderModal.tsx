@@ -1,91 +1,82 @@
-const DeliveryOderModal = ({
-  setDeliveryOrderModalOpen,
-}: {
-  setDeliveryOrderModalOpen: (isOpen: boolean) => void;
-}) => {
-  return (
-    <>
-      <section className="bg-black/45 backdrop-blur-sm  shadow-md fixed inset-0 z-50 p-4 flex items-center justify-center">
-        <div className="h-auto w-full max-w-3xl overflow-auto max-h-160 z-10 bg-white rounded-xl">
-          <div className="border-b border-border px-5 py-4">
-            <h2 className="text-lg font-semibold">
-              Bản đồ di chuyển đơn VC-014
-            </h2>
-            <p className="mt-2 text-xs text-gray-600">
-              Nguyễn Văn Hùng - Lọc gió DENSO DAF - GHTK
-            </p>
-          </div>
-          <div className="px-5 py-4">
-            <div className="mb-4 flex justify-between border border-input bg-gray-50 p-3 text-xs">
-              <span>Đang vận chuyển</span>
-              <span>
-                ETA Giao: <strong>16:00</strong>
-              </span>
-            </div>
-            <p className="mb-3 text-xs font-semibold">HÀNH TRÌNH VẬN CHUYỂN</p>
-            <div className="mb-5 overflow-x-auto border border-border bg-gray-50 p-5">
-              <div className="flex min-w-130 items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-28 rounded-lg bg-white border px-2 py-4 text-center text-xs ">
-                    <p>Kho Denso</p>
-                    <p className="mt-2 ">06:30 - Xuất kho</p>
-                  </div>
-                  <span className="mx-3 ">{"-->"}</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-28 rounded-lg border bg-white px-2 py-4 text-center text-xs">
-                    <p>Cầu Giấy</p>
-                    <p className="mt-2 ">07:45 - Đã qua</p>
-                  </div>
-                  <span className="mx-3 ">{"-->"}</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-28 rounded-lg border px-2 py-4 text-center text-xs bg-white font-semibold">
-                    <p>Đống Đa</p>
-                    <p className="mt-2 ">Đang tại trạm</p>
-                  </div>
-                  <span className="mx-3 t">{"-->"}</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-28 rounded-lg border px-2 bg-white py-4 text-center text-xs border-input">
-                    <p>Địa chỉ khách hàng</p>
-                    <p className="mt-2 ">Dự kiến 16:00</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <label className="mb-3 flex flex-col gap-1.5 text-xs">
-              <span>Trạng thái gọi</span>
-              <select className="h-9 min-w-0 rounded-md border border-input bg-white px-3 ">
-                <option>Chưa gọi</option>
-                <option>CẦN GỌI NGAY</option>
-                <option>Đã gọi xong</option>
-              </select>
-            </label>
-            <label className="mb-3 flex flex-col gap-1.5 text-xs">
-              <span>Ghi chú vận hành</span>
-              <textarea className="rounded-md border  bg-white p-3 "></textarea>
-            </label>
-          </div>
-          <div className="flex flex-wrap justify-end gap-2 border-t border-border bg-gray-50 px-5 py-4">
-            <button
-              type="button"
-              className="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-3.5 font-medium   bg-white hover:bg-gray-50 "
-              onClick={() => setDeliveryOrderModalOpen(false)}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-3.5 font-medium bg-red-700 text-white  hover:bg-red-800 "
-            >
-              Lưu cập nhật
-            </button>
-          </div>
-        </div>
-      </section>
-    </>
-  );
+import { Button } from "../../../components/ui/button";
+import Modal from "../../../components/ui/Modal";
+import SelectOption from "../../../components/ui/SelectOption";
+import { Textarea } from "../../../components/ui/textarea";
+import type { DeliveryOrder } from "../../../services/types";
+
+type DeliveryOrderModalProps = {
+  order: DeliveryOrder;
+  callStatusOptions: DeliveryOrder["callStatus"][];
+  onClose: () => void;
 };
+
+const DeliveryOderModal = ({
+  order,
+  callStatusOptions,
+  onClose,
+}: DeliveryOrderModalProps) => (
+  <Modal
+    title={`Bản đồ di chuyển đơn ${order.orderCode}`}
+    description={`${order.customerName} - ${order.product} - ${order.carrier}`}
+    open
+    onClose={onClose}
+    className="max-h-[90vh] max-w-3xl overflow-y-auto"
+    contentClassName="space-y-4 px-5 py-4"
+  >
+    <div className="flex flex-wrap justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
+      <span>{order.status}</span>
+      <span>
+        ETA giao: <strong>{order.eta}</strong>
+      </span>
+    </div>
+
+    <section>
+      <h3 className="mb-3 text-sm font-semibold text-gray-900">
+        Hành trình vận chuyển
+      </h3>
+      <div className="overflow-x-auto rounded-md border border-gray-200 bg-gray-50 p-4">
+        <div className="flex min-w-max items-center justify-between gap-3">
+          {order.routeStops.map((stop, index) => (
+            <div key={`${stop.location}-${index}`} className="flex items-center gap-3">
+              <div
+                className={`w-28 rounded-md border px-2 py-3 text-center text-xs ${
+                  stop.status === "current"
+                    ? "border-red-200 bg-red-50"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <p className="font-medium">{stop.location}</p>
+                <p className="mt-2 text-gray-600">{stop.description}</p>
+              </div>
+              {index < order.routeStops.length - 1 && (
+                <span aria-hidden="true" className="text-gray-500">
+                  →
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <SelectOption
+      title="Trạng thái gọi"
+      placeholder="Chọn trạng thái"
+      option={callStatusOptions}
+      defaultValue={order.callStatus}
+    />
+
+    <label className="flex flex-col gap-1.5 text-sm">
+      <span className="font-medium text-gray-700">Ghi chú vận hành</span>
+      <Textarea rows={3} className="resize-y bg-white" />
+    </label>
+
+    <div className="-mx-5 -mb-4 flex flex-wrap justify-end gap-2 border-t border-gray-200 bg-gray-50 px-5 py-4">
+      <Button type="button" variant="outline" onClick={onClose}>
+        Đóng
+      </Button>
+    </div>
+  </Modal>
+);
 
 export default DeliveryOderModal;

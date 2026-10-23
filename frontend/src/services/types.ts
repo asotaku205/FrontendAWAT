@@ -15,6 +15,21 @@ export type AddressParseDataType = {
   status: "Chưa xác nhận" | "Đã xác nhận" | "Lỗi phân tách";
 };
 
+export type AuthLoginRequest = {
+  email: string;
+  password: string;
+};
+
+export type AuthLoginResponse = {
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
+};
+
 export type PendingAddressDataType = {
   orderCode: string;
   customerName: string;
@@ -125,6 +140,20 @@ export type DeliveryOrder = {
   eta: string;
   timeCall: string;
   callStatus: "Đã gọi xong" | "Chưa gọi" | "Cần gọi ngay";
+  routeStops: DeliveryRouteStop[];
+};
+
+export type DeliveryRouteStop = {
+  location: string;
+  description: string;
+  status: "completed" | "current" | "upcoming";
+};
+
+export type DashboardSummary = {
+  ordersToday: number;
+  processingOrders: number;
+  ordersNeedingAttention: number;
+  completionRate: number;
 };
 
 export type TelesaleRecord = {
@@ -137,6 +166,136 @@ export type TelesaleRecord = {
   dateCreated: string;
   status: "Chưa gọi" | "Thành công" | "Thất bại";
   staffName: string;
+};
+
+export type TelesaleCallRecord = {
+  employeeName: string;
+  orderCode: string;
+  waybill: string;
+  assignedAt?: string;
+  customerName?: string;
+  phoneNumber?: string;
+  expectedDelivery?: string;
+  resultNote?: string;
+  startedAt: string;
+  endedAt: string;
+  durationSeconds: number;
+  afterCallSeconds: number;
+  nextOrderReceivedAt: string | null;
+  result: "Thành công" | "Thất bại";
+  timeline?: { time: string; title: string; detail: string }[];
+};
+
+export type TelesaleEmployee = {
+  employeeName: string;
+  receivingStatus: "Đang nhận" | "Tạm dừng";
+  callStatus: "Thành công" | "Tạm dừng";
+  successfulCalls: number;
+  failedCalls: number;
+  successRate: number;
+  totalCalls: number;
+  averageCallTime: string;
+  totalCallTime: string;
+  pausedSeconds?: number;
+  progress: number;
+  workingStatus: boolean;
+};
+
+export type TelesaleSummary = {
+  averageCallTimeSeconds: number;
+  totalCallsToday: number;
+  successfulCalls: number;
+  failedCalls: number;
+  successRate: number;
+  activeEmployees: number;
+  pausedEmployees: number;
+};
+
+export type TelesaleOverviewResponse = {
+  totalOrdersToday: number;
+  priorityOrders: number;
+  completedPriorityCalls: number;
+  notNeedCall: number;
+  priorityOrdersList: {
+    code: string;
+    customer: string;
+    phone: string;
+    eta: string;
+    suggestion: string;
+    reason: string;
+    status: string;
+  }[];
+};
+
+export type TelesaleEmployeeCallSummary = {
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  averageCallTime: string;
+};
+
+export type TelesaleEmployeeFilterOptions = {
+  employees: string[];
+  receivingStatuses: TelesaleEmployee["receivingStatus"][];
+  callStatuses: TelesaleEmployee["callStatus"][];
+  workingStatuses: { label: string; value: "true" | "false" }[];
+};
+
+export type TelesalePriorityOrder = {
+  orderCode: string;
+  waybill: string;
+  customerName: string;
+  phoneNumber: string;
+  expectedDelivery: string;
+  product: string;
+  eta: string;
+  callSuggestion: string;
+  status: "Chưa chia" | "Đã chia" | "Đang gọi";
+  assignedEmployee: string | null;
+};
+
+export type TelesaleAssignmentAgent = {
+  employeeId: string;
+  employeeName: string;
+  status: "Đang làm" | "Nghỉ";
+  activeCalls: number;
+  autoAccept: boolean;
+  priority: "Theo ETA" | "Theo số đơn" | "Thủ công";
+};
+
+export type TelesaleAssignmentSummary = {
+  totalOrders: number;
+  priorityOrders: number;
+  assignedToday: number;
+  activeEmployees: number;
+  notNeedCall: number;
+};
+
+export type TelesaleWorkSummary = {
+  employeeName: string;
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  averageCallSpeed: number;
+  date: string;
+  completedCalls: number;
+  targetCalls: number;
+  currentCallStartedAt: string;
+  currentCallDurationSeconds: number;
+};
+
+export type TelesaleWorkOrder = {
+  orderCode: string;
+  employeeName: string;
+  customerName: string;
+  phoneNumber: string;
+  waybill: string;
+  expectedDelivery: string;
+  duration: string;
+  result: "Đang gọi" | "Thành công" | "Thất bại";
+  address: string;
+  shippingEvents: { time: string; status: string }[];
+  product: string;
 };
 
 export type ForecastProduct = {

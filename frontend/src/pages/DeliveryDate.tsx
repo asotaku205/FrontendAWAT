@@ -1,28 +1,152 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Button } from "../components/ui/button";
+import Filter from "../components/ui/Filter";
 import SearchInput from "../components/ui/SearchInput";
-import Pagination from "../components/ui/Pagination";
+import SelectOption from "../components/ui/SelectOption";
+import Table, { type TableColumn } from "../components/ui/Table";
 import useApiData from "../hooks/useApiData";
 import usePagination from "../hooks/usePagination";
 import { API_ENDPOINTS } from "../services/api";
 import type { DeliveryOrder } from "../services/types";
 import DeliveryOderModal from "./delivery-date/components/DeliveryOderModal";
 
+const pageSize = 5;
+const emptyOrders: DeliveryOrder[] = [];
+
+const columns: TableColumn<DeliveryOrder>[] = [
+  { key: "orderCode", title: "Mã đơn" },
+  { key: "customerName", title: "Khách hàng" },
+  { key: "product", title: "Sản phẩm", className: "min-w-48" },
+  { key: "carrier", title: "Đơn vị vận chuyển" },
+  { key: "station", title: "Trạm" },
+  {
+    key: "status",
+    title: "Trạng thái",
+    render: ({ status }) => (
+      <span
+        className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${
+          status === "Trễ hạn"
+            ? "bg-red-50 text-red-700"
+            : status === "Sắp đến nơi"
+              ? "bg-amber-50 text-amber-700"
+              : "bg-blue-50 text-blue-700"
+        }`}
+      >
+        {status}
+      </span>
+    ),
+  },
+  { key: "eta", title: "ETA" },
+  { key: "timeCall", title: "Khung gọi tối ưu" },
+  { key: "callStatus", title: "Trạng thái gọi" },
+];
+
 const DeliveryDate = () => {
   const [isAdvanceSearchOpen, setIsAdvanceSearchOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [stationFilter, setStationFilter] = useState("");
+  const [carrierFilter, setCarrierFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [activeStation, setActiveStation] = useState("");
+  const [urgentOnly, setUrgentOnly] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<DeliveryOrder | null>(null);
   const { data, error, isLoading } = useApiData<DeliveryOrder[]>(
     API_ENDPOINTS.deliveryOrders,
   );
-  const deliveryOrders = data ?? [];
+  const deliveryOrders = data ?? emptyOrders;
+
+  const stations = useMemo(
+    () => [...new Set(deliveryOrders.map(({ station }) => station))],
+    [deliveryOrders],
+  );
+  const carriers = useMemo(
+    () => [...new Set(deliveryOrders.map(({ carrier }) => carrier))],
+    [deliveryOrders],
+  );
+  const orderStatuses = useMemo(
+    () => [...new Set(deliveryOrders.map(({ status }) => status))],
+    [deliveryOrders],
+  );
+  const callStatuses = useMemo(
+    () => [...new Set(deliveryOrders.map(({ callStatus }) => callStatus))],
+    [deliveryOrders],
+  );
+  const stationStats = useMemo(
+    () =>
+      stations.map((station) => {
+        const orders = deliveryOrders.filter((order) => order.station === station);
+        return {
+          station,
+          orderCount: orders.length,
+          overdueCount: orders.filter((order) => order.status === "Trễ hạn").length,
+        };
+      }),
+    [deliveryOrders, stations],
+  );
+  const selectedStation =
+    stationStats.find(({ station }) => station === activeStation)?.station ??
+    stationStats[0]?.station ??
+    "";
+  const ordersAtStation = useMemo(
+    () => deliveryOrders.filter((order) => order.station === selectedStation),
+    [deliveryOrders, selectedStation],
+  );
+  const overdueCount = useMemo(
+    () => deliveryOrders.filter((order) => order.status === "Trễ hạn").length,
+    [deliveryOrders],
+  );
+  const notCalledCount = useMemo(
+    () => deliveryOrders.filter((order) => order.callStatus === "Chưa gọi").length,
+    [deliveryOrders],
+  );
+  const filteredOrders = useMemo(() => {
+    const query = searchText.trim().toLocaleLowerCase();
+    return deliveryOrders.filter((order) => {
+      const matchesSearch =
+        !query ||
+        [
+          order.orderCode,
+          order.customerName,
+          order.product,
+          order.station,
+          order.carrier,
+        ]
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(query);
+      const needsAttention =
+        order.status === "Trễ hạn" || order.callStatus === "Cần gọi ngay";
+
+      return (
+        matchesSearch &&
+        (!stationFilter || order.station === stationFilter) &&
+        (!carrierFilter || order.carrier === carrierFilter) &&
+        (!statusFilter || order.status === statusFilter) &&
+        (!urgentOnly || needsAttention)
+      );
+    });
+  }, [
+    carrierFilter,
+    deliveryOrders,
+    searchText,
+    stationFilter,
+    statusFilter,
+    urgentOnly,
+  ]);
   const { currentData, totalPages, currentPage, setCurrentPage } = usePagination({
-    data: deliveryOrders,
-    pageSize: 5,
+    data: filteredOrders,
+    pageSize,
   });
 
-  const startItem = (currentPage - 1) * 5 + 1;
-
-  const endItem = Math.min(currentPage * 5, deliveryOrders.length);
-
-  const [isDeliveryOrderModalOpen, setDeliveryOrderModalOpen] = useState(false);
+  const resetFilters = () => {
+    setSearchText("");
+    setStationFilter("");
+    setCarrierFilter("");
+    setStatusFilter("");
+    setIsAdvanceSearchOpen(false);
+    setUrgentOnly(false);
+    setCurrentPage(1);
+  };
 
   if (isLoading) return <p role="status">Đang tải danh sách đơn giao hàng...</p>;
   if (error) {
@@ -30,226 +154,180 @@ const DeliveryDate = () => {
   }
 
   return (
-    <>
-      <div className="text-lg font-bold pb-5">Dự đoán thời gian giao hàng</div>
-      <div className="mb-4 flex items-center justify-between gap-3 bg-white rounded-lg border border-b-red-600  px-4 py-3">
-        <p className="font-bold text-red-800">
-          CẢNH BÁO VẬN HÀNH: 2 đơn trễ hạn - 3 đơn chưa gọi trong khung giờ tối
-          ưu
-          <span className="text-sm text-gray-500 font-normal">
+    <section className="space-y-4">
+      <h1 className="text-lg font-bold text-gray-900">
+        Dự đoán thời gian giao hàng
+      </h1>
+
+      <section
+        role="status"
+        className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 border-l-4 border-l-red-700 bg-white px-4 py-3"
+      >
+        <p className="text-sm font-semibold text-red-800">
+          CẢNH BÁO VẬN HÀNH: {overdueCount} đơn trễ hạn - {notCalledCount} đơn
+          chưa gọi
+          <span className="font-normal text-gray-500">
             {" "}
-            - Cần kiểm tra & chuyển Telesale
+            - Cần kiểm tra &amp; chuyển Telesale
           </span>
         </p>
-        <button className="rounded-md px-3 py-2 border border-gray-100 justify-center gap-1.5 font-bold bg-red-700 text-white hover:bg-red-800 ">
-          Xem đơn cần xử lý gấp
-        </button>
-      </div>
-      <div className=" border-b mb-2 border-gray-300 p-4 text-xs bg-white rounded ">
-        <div className="flex gap-4">
-          <SearchInput placeholder="Tìm kiếm mã đơn, địa chỉ..." />
-          <button
-            className="rounded-lg border border-gray-300 p-2 hover:bg-gray-100"
-            onClick={() => setIsAdvanceSearchOpen(!isAdvanceSearchOpen)}
-          >
-            Lọc nâng cao
-          </button>
-        </div>
-        <div className="flex gap-4 mt-2">
-          {isAdvanceSearchOpen && (
-            <>
-              <div className="flex flex-col gap-2 ">
-                <span className="text-gray-600">Tỉnh/TP</span>
-                <select className="rounded-lg border border-gray-300 p-2">
-                  <option value="all">Tất cả Tỉnh/TP</option>
-                  <option value="">Hà Nội</option>
-                  <option value="">Hải Phòng</option>
-                  <option value="">TP Hồ Chí Minh</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-2 ">
-                <span className="text-gray-600">Trạm</span>
-                <select className="rounded-lg border border-gray-300 p-2">
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="">Cầu Giấy</option>
-                  <option value="">Hà Đông</option>
-                  <option value="">Thanh Xuân</option>
-                </select>
-              </div>
+        <Button
+          type="button"
+          size="sm"
+          variant={urgentOnly ? "secondary" : "default"}
+          aria-pressed={urgentOnly}
+          onClick={() => {
+            setUrgentOnly((showUrgent) => !showUrgent);
+            setCurrentPage(1);
+          }}
+        >
+          {urgentOnly ? "Hiển thị tất cả đơn" : "Xem đơn cần xử lý gấp"}
+        </Button>
+      </section>
 
-              <div className="flex flex-col gap-2 ">
-                <span className="text-gray-600">Trạng thái</span>
-                <select className="rounded-lg border border-gray-300 p-2">
-                  <option value="">Tất cả Trạng thái</option>
-                  <option value="">Trễ hạn</option>
-                  <option value="">Đang vận chuyển</option>
-                  <option value="">Sắp đến nơi</option>
-                  <option value="">Cần xử lý gấp</option>
-                </select>
-              </div>
-            </>
-          )}
+      <Filter className="items-start" onReset={resetFilters}>
+        <div className="flex w-full flex-wrap items-end gap-3">
+          <SearchInput
+            aria-label="Tìm kiếm đơn giao hàng"
+            placeholder="Tìm mã đơn, khách hàng, sản phẩm..."
+            value={searchText}
+            onChange={(event) => {
+              setSearchText(event.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsAdvanceSearchOpen((isOpen) => !isOpen)}
+            aria-expanded={isAdvanceSearchOpen}
+          >
+            {isAdvanceSearchOpen ? "Ẩn bộ lọc" : "Lọc nâng cao"}
+          </Button>
         </div>
-      </div>
-      <div className="mb-5 grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <section className="min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-t-lg border border-border bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.025em]">
-            <span>Bản đồ các trạm trung gian (HUB) - Mô hình dự đoán</span>
-          </div>
-          <div className="overflow-x-auto rounded-b-lg border border-border bg-white ">
-            <div className=" flex h-85 min-w-170">
-              <button className="  w-28 rounded-lg border px-2 py-3 text-center text-xs bg-gray-50  font-semibold ">
-                <span className="">Cầu Giấy</span>
-                <span className="mt-1 ">(212 đơn)</span>
-              </button>
-              <button className=" m-2 rounded-lg border px-2 py-3 text-center text-xs  bg-white hover:bg-gray-50 ">
-                <span className="">Hoàn Kiếm</span>
-                <span className="mt-1  ">(134 đơn)</span>
-              </button>
-              <button className="m-2 rounded-lg border px-2 py-3 text-center text-xs  bg-white hover:bg-gray-50">
-                <span className="">Đống Đa</span>
-                <span className="mt-1 ">(98 đơn)</span>
-              </button>
-              <button className="m-2 rounded-lg border px-2 py-3 text-center text-xs  bg-white hover:bg-gray-50">
-                <span className="">Long Biên</span>
-                <span className="mt-1 ">(84 đơn)</span>
-              </button>
-              <button className="m-2 rounded-lg border px-2 py-3 text-center text-xs  bg-white hover:bg-gray-50">
-                <span className="">Gia Lâm</span>
-                <span className="mt-1 ]">(45 đơn)</span>
-              </button>
-              <button className="m-2 rounded-lg border px-2 py-3 text-center text-xs  bg-white hover:bg-gray-50">
-                <span className="">Hà Đông</span>
-                <span className="mt-1 ">(67 đơn - Trễ)</span>
-              </button>
-            </div>
-          </div>
-        </section>
-        <section>
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-t-lg border border-border bg-white px-4 py-3 text-xs font-semibold uppercase">
-            <span>Chi tiết: Cầu Giấy (212 đơn đang qua)</span>
-          </div>
-          <div className="min-h-85 space-y-3 rounded-b-lg border border-border bg-white p-3">
-            <button
-              className="w-full rounded-md border border-border bg-gray-50 px-3 py-4 text-left text-xs hover:bg-gray-100"
-              onClick={() => setDeliveryOrderModalOpen(true)}
-            >
-              <p className="font-medium">VC-003 - Cảm biến oxy DENSO</p>
-              <p>ETA: 15:00 | Khung gọi: 13:00-14:00</p>
-              <p className="font-semibold">Chờ gọi</p>
-            </button>
-            <button
-              className="w-full rounded-md border border-border bg-gray-50 px-3 py-4 text-left text-xs hover:bg-gray-100"
-              onClick={() => setDeliveryOrderModalOpen(true)}
-            >
-              <p className="font-medium">VC-0022 - Cảm biến oxy DENSO</p>
-              <p>ETA: 15:00 | Khung gọi: 13:00-14:00</p>
-              <p className="font-semibold">Đã gọi xong</p>
-            </button>
-            <button
-              className="w-full rounded-md border border-border bg-gray-50 px-3 py-4 text-left text-xs hover:bg-gray-100"
-              onClick={() => setDeliveryOrderModalOpen(true)}
-            >
-              <p className="font-medium">VC-0027 - Cảm biến oxy DENSO</p>
-              <p>ETA: 15:00 | Khung gọi: 13:00-14:00</p>
-              <p className="font-semibold">Đã gọi xong</p>
-            </button>
-          </div>
-        </section>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-t-lg border border-border bg-white px-4 py-3 text-xs font-semibold">
-        Danh sách đơn đang giao
-      </div>
-      <div className="overflow-x-auto rounded-lg border border-border bg-white text-xs">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="bg-gray-100 text-gray-800">
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Mã đơn
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Khách hàng
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Sản phẩm
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Đơn vị vận chuyển
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Trạm
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Trạng thái
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                ETA
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Khung gọi tối ưu
-              </th>
-              <th className="whitespace-nowrap border-b border-r border-border px-3 py-3 font-semibold ">
-                Trạng thái gọi
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.map((data) => (
-              <tr>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.orderCode}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.customerName}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.product}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.carrier}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.station}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.status}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.eta}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.timeCall}
-                </td>
-                <td className="border-b border-r px-3 py-3 items-center ">
-                  {data.callStatus}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-          <span className="text-xs text-gray-400">
-            Hiển thị{" "}
-            <span className="font-medium text-gray-600">
-              {startItem}-{endItem}
-            </span>{" "}
-            /
-            <span className="font-medium text-gray-600">
-              {deliveryOrders.length}
-            </span>{" "}
-            bản ghi
-          </span>
-          <div className="flex items-center gap-1">
-            <Pagination
-              page={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
+        {isAdvanceSearchOpen && (
+          <div className="flex w-full flex-wrap gap-3">
+            <SelectOption
+              title="Trạm"
+              placeholder="Tất cả trạm"
+              option={stations}
+              isFilter
+              value={stationFilter}
+              onChange={(event) => {
+                setStationFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <SelectOption
+              title="Đơn vị vận chuyển"
+              placeholder="Tất cả đơn vị"
+              option={carriers}
+              isFilter
+              value={carrierFilter}
+              onChange={(event) => {
+                setCarrierFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <SelectOption
+              title="Trạng thái"
+              placeholder="Tất cả trạng thái"
+              option={orderStatuses}
+              isFilter
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
-        </div>
+        )}
+      </Filter>
+
+      <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <section className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white">
+          <h2 className="border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-900">
+            Bản đồ các trạm trung gian (HUB) - Mô hình dự đoán
+          </h2>
+          <div className="flex min-h-64 min-w-max items-center justify-around gap-2 overflow-x-auto p-4">
+            {stationStats.map(({ station, orderCount, overdueCount: lateCount }) => (
+              <Button
+                key={station}
+                type="button"
+                variant={station === selectedStation ? "secondary" : "outline"}
+                aria-pressed={station === selectedStation}
+                className="h-auto min-h-20 min-w-28 flex-col whitespace-normal px-3 py-3 text-center text-xs"
+                onClick={() => setActiveStation(station)}
+              >
+                <span className="font-semibold">{station}</span>
+                <span className="font-normal">
+                  {orderCount} đơn{lateCount > 0 ? ` - ${lateCount} trễ` : ""}
+                </span>
+              </Button>
+            ))}
+            {stationStats.length === 0 && (
+              <p className="text-sm text-gray-500">Chưa có dữ liệu trạm.</p>
+            )}
+          </div>
+        </section>
+
+        <section className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+          <h2 className="border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-900">
+            Chi tiết: {selectedStation || "Chưa có trạm"} ({ordersAtStation.length}{" "}
+            đơn)
+          </h2>
+          <div className="space-y-3 p-3">
+            {ordersAtStation.map((order) => (
+              <Button
+                key={order.orderCode}
+                type="button"
+                variant="outline"
+                className="h-auto w-full flex-col items-start whitespace-normal bg-gray-50 px-3 py-4 text-left text-xs font-normal hover:bg-gray-100"
+                onClick={() => setSelectedOrder(order)}
+              >
+                <span className="font-medium">
+                  {order.orderCode} - {order.product}
+                </span>
+                <span>
+                  {order.customerName} | ETA: {order.eta} | Khung gọi:{" "}
+                  {order.timeCall}
+                </span>
+                <span className="font-semibold">{order.callStatus}</span>
+              </Button>
+            ))}
+            {ordersAtStation.length === 0 && (
+              <p className="py-6 text-center text-sm text-gray-500">
+                Không có đơn tại trạm này.
+              </p>
+            )}
+          </div>
+        </section>
       </div>
-      {isDeliveryOrderModalOpen && <DeliveryOderModal setDeliveryOrderModalOpen={setDeliveryOrderModalOpen}/>}
-    </>
+
+      <Table
+        title="Danh sách đơn đang giao"
+        columns={columns}
+        records={currentData}
+        rowKey="orderCode"
+        emptyMessage="Không tìm thấy đơn giao hàng phù hợp"
+        tableClassName="min-w-max"
+        pagination={{
+          page: currentPage,
+          pageSize,
+          totalPages,
+          totalRecords: filteredOrders.length,
+          onPageChange: setCurrentPage,
+        }}
+      />
+
+      {selectedOrder && (
+        <DeliveryOderModal
+          order={selectedOrder}
+          callStatusOptions={callStatuses}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
+    </section>
   );
 };
 

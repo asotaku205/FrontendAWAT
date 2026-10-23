@@ -1,7 +1,6 @@
 import Table, { type TableColumn } from "../components/ui/Table";
-import useApiData from "../hooks/useApiData";
+import useBusinessForecast from "../hooks/useBusinessForecast";
 import usePagination from "../hooks/usePagination";
-import { API_ENDPOINTS } from "../services/api";
 import type { ForecastProduct } from "../services/types";
 
 const pageSize = 5;
@@ -23,9 +22,7 @@ const columns: TableColumn<ForecastProduct>[] = [
 ];
 
 const BusinessForecast = () => {
-  const { data, error, isLoading } = useApiData<ForecastProduct[]>(
-    API_ENDPOINTS.forecastProducts,
-  );
+  const { data, error, isLoading } = useBusinessForecast();
   const records = data ?? [];
   const { currentData, currentPage, totalPages, setCurrentPage } = usePagination({
     data: records,
