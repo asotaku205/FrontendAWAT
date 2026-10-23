@@ -4,9 +4,7 @@ import { BrowserRouter } from "react-router";
 import App from "./App";
 import "./index.css";
 
-const useMocks =
-  import.meta.env.VITE_USE_MOCKS === "true" ||
-  (import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS !== "false");
+const useMocks = import.meta.env.VITE_USE_MOCKS === "true";
 
 if (useMocks) {
   const { worker } = await import("./mocks/browser");
