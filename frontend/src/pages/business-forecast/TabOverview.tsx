@@ -9,7 +9,11 @@ import {
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 
-const TabOverview = () => {
+type TabOverviewProps = {
+  onTodoAction: (action: string) => void;
+};
+
+const TabOverview = ({ onTodoAction }: TabOverviewProps) => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
@@ -38,6 +42,7 @@ const TabOverview = () => {
                     key={t.rank}
                     className="min-w-40"
                     size="xs"
+                    onClick={() => onTodoAction(t.action)}
                   >
                     {t.action}
                   </Button>

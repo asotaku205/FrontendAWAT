@@ -9,20 +9,43 @@ import TabWarning from "./business-forecast/TabWarning";
 import TabActivity from "./business-forecast/TabActivity";
 import { Button } from "../components/ui/button";
 
-const tabs = [
-  { id: "overview", label: "Tổng quan", content: <TabOverview /> },
-  { id: "real", label: "Thực tế", content: <TabReal /> },
-  { id: "forecast", label: "Dự báo", content: <TabForecast /> },
-  { id: "channel", label: "Kênh bán", content: <TabChannel /> },
-  { id: "stock", label: "Tồn kho", content: <TabStock /> },
-  { id: "customer", label: "Khách hàng", content: <TabCustomer /> },
-  { id: "warning", label: "Cảnh báo", content: <TabWarning /> },
-  { id: "activity", label: "Hoạt động", content: <TabActivity /> },
-];
-
 const BusinessForecast = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const active = tabs.find((t) => t.id === activeTab)!;
+  const tabs = [
+    { id: "overview", label: "Tổng quan" },
+    { id: "real", label: "Thực tế" },
+    { id: "forecast", label: "Dự báo" },
+    { id: "channel", label: "Kênh bán" },
+    { id: "stock", label: "Tồn kho" },
+    { id: "customer", label: "Khách hàng" },
+    { id: "warning", label: "Cảnh báo" },
+    { id: "activity", label: "Hoạt động" },
+  ];
+
+  const handleOverviewAction = (action: string) => {
+    const targetTab: Record<string, string> = {
+      "Chuẩn bị nhập / sản xuất": "stock",
+      "Xem đơn hoàn": "real",
+      "Giảm ngân sách": "channel",
+      "Tăng tồn kho": "stock",
+    };
+    const nextTab = targetTab[action];
+    if (nextTab) setActiveTab(nextTab);
+  };
+
+  const activeContent = (() => {
+    switch (activeTab) {
+      case "overview": return <TabOverview onTodoAction={handleOverviewAction} />;
+      case "real": return <TabReal />;
+      case "forecast": return <TabForecast />;
+      case "channel": return <TabChannel />;
+      case "stock": return <TabStock />;
+      case "customer": return <TabCustomer />;
+      case "warning": return <TabWarning onNavigateTab={setActiveTab} />;
+      case "activity": return <TabActivity />;
+      default: return <TabOverview onTodoAction={handleOverviewAction} />;
+    }
+  })();
 
   return (
     <div className="space-y-4">
@@ -42,7 +65,7 @@ const BusinessForecast = () => {
         ))}
       </div>
       {/* tab content */}
-      {active.content}
+      {activeContent}
     </div>
   );
 };

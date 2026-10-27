@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
@@ -40,12 +41,20 @@ const realColumns: TableColumn<(typeof realRecentOrders)[number]>[] = [
   },
   { key: "updated", title: "Cập nhật" },
 ];
+
+
+
 const TabReal = () => {
+  const [showAllOrders, setShowAllOrders] = useState(false);
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
       data: realRecentOrders,
       pageSize: 4,
     });
+
+  if (showAllOrders) {
+    return <AllOrdersPage onBack={() => setShowAllOrders(false)} />;
+  }
 
   return (
     <div className="space-y-4">
@@ -96,7 +105,11 @@ const TabReal = () => {
 
       {/* Đơn hàng gần đây */}
       <Panel title="Đơn hàng gần đây">
-        <Button variant="link" className="px-0">
+        <Button
+          variant="link"
+          className="px-0"
+          onClick={() => setShowAllOrders(true)}
+        >
           Xem toàn bộ đơn
         </Button>
 
@@ -113,8 +126,121 @@ const TabReal = () => {
           }}
         />
       </Panel>
+
     </div>
   );
 };
 
 export default TabReal;
+
+
+const AllOrdersPage = ({ onBack }: { onBack: () => void }) => {
+  const [channelFilter, setChannelFilter] = useState("all");
+  const [regionFilter, setRegionFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [search, setSearch] = useState("");
+
+  const filteredOrders = realRecentOrders.filter((order) => {
+    const matchesChannel = channelFilter === "all" || order.channel === channelFilter;
+    const matchesRegion = regionFilter === "all" || order.region === regionFilter;
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    const searchText = search.trim().toLowerCase();
+    const matchesSearch =
+      !searchText ||
+      order.id.toLowerCase().includes(searchText) ||
+      order.product.toLowerCase().includes(searchText);
+
+    return matchesChannel && matchesRegion && matchesStatus && matchesSearch;
+  });
+
+  const { currentData, totalPages, currentPage, setCurrentPage } =
+    usePagination({ data: filteredOrders, pageSize: 4 });
+
+  const resetFilters = () => {
+    setChannelFilter("all");
+    setRegionFilter("all");
+    setStatusFilter("all");
+    setSearch("");
+    setCurrentPage(1);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Toàn bộ đơn hàng</h2>
+          <p className="text-sm text-gray-500">Lọc và tra cứu các đơn hàng thực tế.</p>
+        </div>
+        <Button variant="outline" onClick={onBack}>Quay lại tổng quan thực tế</Button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-3">
+        <input
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setCurrentPage(1);
+          }}
+          placeholder="Tìm mã đơn hoặc mã sản phẩm..."
+          className="min-w-56 rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+        />
+        <select
+          value={channelFilter}
+          onChange={(event) => {
+            setChannelFilter(event.target.value);
+            setCurrentPage(1);
+          }}
+          className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+        >
+          <option value="all">Kênh: Tất cả</option>
+          {[...new Set(realRecentOrders.map((order) => order.channel))].map((channel) => (
+            <option key={channel} value={channel}>{channel}</option>
+          ))}
+        </select>
+        <select
+          value={regionFilter}
+          onChange={(event) => {
+            setRegionFilter(event.target.value);
+            setCurrentPage(1);
+          }}
+          className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+        >
+          <option value="all">Khu vực: Tất cả</option>
+          {[...new Set(realRecentOrders.map((order) => order.region))].map((region) => (
+            <option key={region} value={region}>{region}</option>
+          ))}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(event) => {
+            setStatusFilter(event.target.value);
+            setCurrentPage(1);
+          }}
+          className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+        >
+          <option value="all">Trạng thái: Tất cả</option>
+          {[...new Set(realRecentOrders.map((order) => order.status))].map((status) => (
+            <option key={status} value={status}>{status}</option>
+          ))}
+        </select>
+        <Button variant="outline" onClick={resetFilters}>Xóa bộ lọc</Button>
+      </div>
+
+      <Panel title={`Danh sách đơn (${filteredOrders.length})`}>
+        <Table
+          columns={realColumns}
+          records={currentData}
+          rowKey="id"
+          emptyMessage="Không tìm thấy đơn phù hợp với bộ lọc."
+          pagination={{
+            page: currentPage,
+            pageSize: 4,
+            totalPages,
+            totalRecords: filteredOrders.length,
+            onPageChange: setCurrentPage,
+          }}
+        />
+      </Panel>
+    </div>
+  );
+};

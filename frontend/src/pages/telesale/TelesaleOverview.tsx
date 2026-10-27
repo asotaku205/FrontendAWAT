@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import Card from "../../components/ui/Card";
 import { Button } from "../../components/ui/button";
 import Table, { type TableColumn } from "../../components/ui/Table";
@@ -14,6 +14,10 @@ type PriorityOrder = TelesaleOverviewResponse["priorityOrdersList"][number];
 
 const TelesaleOverview = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const priorityCustomer = (
+    location.state as { priorityCustomer?: PriorityOrder } | null
+  )?.priorityCustomer;
   const {
     data: employees,
     error: employeesError,
@@ -44,6 +48,9 @@ const TelesaleOverview = () => {
     { key: "reason", title: "Lý do ưu tiên" },
     { key: "status", title: "Trạng thái hệ thống" },
   ];
+  const priorityOrders = priorityCustomer
+    ? [priorityCustomer, ...(overview?.priorityOrdersList ?? [])]
+    : (overview?.priorityOrdersList ?? []);
   const employeeColumns: TableColumn<TelesaleEmployee>[] = [
     { key: "employeeName", title: "Nhân viên" },
     { key: "receivingStatus", title: "Trạng thái" },
@@ -170,7 +177,7 @@ const TelesaleOverview = () => {
         <Table
           title="Đơn ưu tiên gọi tiếp theo"
           columns={priorityOrderColumns}
-          records={overview?.priorityOrdersList ?? []}
+          records={priorityOrders}
           rowKey="code"
           tableClassName="min-w-[850px]"
         />
