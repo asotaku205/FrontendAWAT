@@ -2,15 +2,16 @@ import { Button } from "../../components/ui/button";
 import {
   statusBadgeClass,
   needsDecision,
-  type CheckOrder,
 } from "../../mock/BlacklistData";
+import type { BlacklistOrder } from "../../services/types";
 
 type Props = {
-  order: CheckOrder | null;
+  order: BlacklistOrder | null;
   onClose: () => void;
+  onDecision: (action: "go" | "cancel", order: BlacklistOrder) => void;
 };
 
-const OrderDetailModal = ({ order, onClose }: Props) => {
+const OrderDetailModal = ({ order, onClose, onDecision }: Props) => {
   if (!order) return null;
 
   return (
@@ -26,7 +27,7 @@ const OrderDetailModal = ({ order, onClose }: Props) => {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-base font-bold text-gray-900">
-              {order.id}
+              {order.orderCode}
             </span>
             <span
               className={`rounded px-2 py-0.5 text-xs font-semibold ${statusBadgeClass[order.status]}`}
@@ -41,27 +42,27 @@ const OrderDetailModal = ({ order, onClose }: Props) => {
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
           <div className="text-gray-500">Khách hàng</div>
-          <div className="font-medium text-gray-900">{order.customer}</div>
+          <div className="font-medium text-gray-900">{order.customerName}</div>
           <div className="text-gray-500">SĐT</div>
           <div className="font-medium text-gray-900 flex flex-col">
-            <span>{order.phone}</span>
+            <span>{order.phoneNumber}</span>
             <span
-              className={`rounded px-2 py-0.5 max-w-35 whitespace-nowrap text-xs font-semibold ${order.inBlacklist ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
+              className={`rounded px-2 py-0.5 max-w-35 whitespace-nowrap text-xs font-semibold ${order.isBlacklisted ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
             >
-              {order.inBlacklist ? "Trong blacklist" : "Không trong blacklist"}
+              {order.isBlacklisted ? "Trong blacklist" : "Không trong blacklist"}
             </span>
           </div>
           <div className="text-gray-500">Ngày đặt hàng</div>
           <div className="text-gray-900">{order.orderDate}</div>
           <div className="text-gray-500">Sản phẩm</div>
           <div className="text-gray-900">
-            {order.product} x {order.qty}
+            {order.productName} x {order.quantity}
           </div>
           <div className="text-gray-500">Giá trị đơn</div>
-          <div className="text-gray-900">{order.amount}</div>
+          <div className="text-gray-900">{order.orderValue}</div>
           <div className="text-gray-500">Nguồn / NV ADS</div>
           <div className="text-gray-900">
-            {order.source} {order.adsStaff !== "-" && `/ ${order.adsStaff}`}
+            {order.orderSource} {order.adsStaffName !== "-" && `/ ${order.adsStaffName}`}
           </div>
         </div>
 
@@ -73,33 +74,33 @@ const OrderDetailModal = ({ order, onClose }: Props) => {
             <div className="flex justify-between">
               <span className="text-gray-500">Số đơn trong 3 tháng</span>
               <span className="font-semibold text-gray-900">
-                {order.orders3m} đơn
+                {order.orderCountLast3Months} đơn
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Tỷ lệ hoàn 1 tháng</span>
               <span
-                className={`font-semibold ${order.refundRate1m > 60 ? "text-red-600" : "text-green-600"}`}
+                className={`font-semibold ${order.refundRateLastMonth > 60 ? "text-red-600" : "text-green-600"}`}
               >
-                {order.refundRate1m}%
+                {order.refundRateLastMonth}%
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Tỷ lệ hoàn 3 tháng</span>
               <span
-                className={`font-semibold ${order.refundRate3m > 60 ? "text-red-600" : "text-green-600"}`}
+                className={`font-semibold ${order.refundRateLast3Months > 60 ? "text-red-600" : "text-green-600"}`}
               >
-                {order.refundRate3m}%
+                {order.refundRateLast3Months}%
               </span>
             </div>
           </div>
-        </div>
+        </div>  
 
         {needsDecision(order.status) ? (
           <div className="mt-4 flex gap-2 justify-end">
-            <Button variant={"outline"}>Huỷ đơn</Button>
-            <Button>Duyệt đi đơn</Button>
-          </div>
+            <Button variant="outline" onClick={() => onDecision("cancel", order)}>Hủy đơn</Button>
+            <Button onClick={() => onDecision("go", order)}>Đi đơn</Button>
+            </div>
         ) : (
           <div className="mt-4 rounded-lg border border-gray-200 p-3 text-center text-sm text-gray-500">
             Đơn này không cần kế toán ra quyết định.

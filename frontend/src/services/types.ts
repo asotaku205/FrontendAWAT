@@ -318,3 +318,135 @@ export type MonitorCustomer = {
   refundCount: number;
   totalAmount: number;
 };
+
+export type BlacklistOrderStatus =
+  | "Đã kiểm tra"
+  | "Hoàn nhiều lần"
+  | "Blacklist"
+  | "Đã hủy";
+
+export type BlacklistOrder = {
+  orderCode: string;
+  orderDate: string;
+  customerName: string;
+  phoneNumber: string;
+  productName: string;
+  refundRateSummary: string;
+  refundRateLastMonth: number;
+  refundRateLast3Months: number;
+  quantity: number;
+  orderValue: number;
+  orderSource: string;
+  adsStaffName: string;
+  status: BlacklistOrderStatus;
+  isBlacklisted: boolean;
+  orderCountLast3Months: number;
+};
+
+export type ForecastKpi = {
+  label: string;
+  value: string;
+  sub: string;
+  red?: boolean;
+};
+
+export type ForecastTodoItem = { rank: number; text: string; action: string };
+export type ForecastChannelRevenue = { name: string; percent: number };
+export type ForecastOrderResult = { label: string; value: number; color: string };
+export type ForecastFeaturedProduct = {
+  code: string;
+  name: string;
+  revenue: string;
+  growth: number;
+};
+export type ForecastBusinessSignal = {
+  text: string;
+  badge: string;
+  badgeClass: string;
+};
+export type ForecastRecentOrder = {
+  id: string;
+  channel: string;
+  product: string;
+  region: string;
+  cod: string;
+  status: string;
+  updated: string;
+};
+export type ForecastScenario = {
+  name: string;
+  value: string;
+  change: string;
+  changeClass: string;
+};
+export type ForecastProductToPrepare = {
+  code: string;
+  name: string;
+  demand: string;
+  stock: string;
+  daysLeft: string;
+  action: string;
+};
+export type ForecastChannelOptimization = {
+  name: string;
+  note: string;
+  action: string;
+};
+export type ForecastChannelEfficiency = {
+  channel: string;
+  cost: string;
+  revenue: string;
+  efficiency: string;
+  returnRate: string;
+  growth: string;
+  suggestion: string;
+};
+export type ForecastUrgentStock = { code: string; note: string; action: string };
+export type ForecastStockItem = {
+  code: string;
+  name: string;
+  stock: string;
+  sold7d: string;
+  forecast14d: string;
+  daysLeft: string;
+  status: string;
+  action: string;
+};
+export type ForecastCustomerAction = { text: string; count: string; action: string };
+export type ForecastReturnReason = { reason: string; percent: number };
+export type ForecastCustomerToWatch = {
+  name: string;
+  group: string;
+  orders: string;
+  avgValue: string;
+  returnRate: string;
+  suggestion: string;
+  action: string;
+};
+export type ForecastAlert = {
+  level: string;
+  group: string;
+  issue: string;
+  impact: string;
+  deadline: string;
+  owner: string;
+  action: string;
+};
+export type ForecastAlertDetail = {
+  level: string;
+  title: string;
+  stock: string;
+  daysLeft: string;
+  demand14d: string;
+  suggestion: string;
+};
+export type ForecastRecentActivity = {
+  time: string;
+  activity: string;
+  group: string;
+  by: string;
+  result: string;
+  related: string;
+};
+export type ForecastUpcomingTask = { text: string; level: string; time: string };
+export type ForecastActivityLog = { time: string; text: string };

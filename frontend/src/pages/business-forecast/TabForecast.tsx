@@ -2,35 +2,30 @@ import { Button } from "../../components/ui/button"
 import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import usePagination from "../../hooks/usePagination";
-import { forecastKpis, forecastScenarios, productsToPrepare, weeklyRisks } from "../../mock/ForecastData"
+import { forecastKpis, forecastScenarioData, forecastProductsToPrepare, weeklyRisks } from "../../mock/ForecastData"
 import KpiCard from "./components/KpiCard"
 import Panel from "./components/Panel"
-const forecastColumns: TableColumn<(typeof productsToPrepare)[number]>[] = [
-  { key: "code", title: "Mã SP" },
-  { key: "name", title: "Sản phẩm" },
-  { key: "demand", title: "Nhu cầu 14 ngày" },
-  {
-    key: "stock",
-    title: "Tồn hiện tại",
-  },
-  {
-    key: "daysLeft",
-    title: "Đủ bán",
-  },
-  {
-    key: "action",
-    title: "Hành động",
-    render:(o) => (
-      <Button className={"min-w-40"} size='xs' variant={"outline"}>
-      {o.action}
-    </Button>
-    ),
-  },
-];
+
 const TabForecast = () => {
+  const forecastColumns: TableColumn<(typeof forecastProductsToPrepare)[number]>[] = [
+    { key: "code", title: "Mã SP" },
+    { key: "name", title: "Sản phẩm" },
+    { key: "demand", title: "Nhu cầu 14 ngày" },
+    { key: "stock", title: "Tồn hiện tại" },
+    { key: "daysLeft", title: "Đủ bán" },
+    {
+      key: "action",
+      title: "Hành động",
+      render: (product) => (
+        <Button className={"min-w-40"} size='xs' variant={"outline"}>
+          {product.action}
+        </Button>
+      ),
+    },
+  ];
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: productsToPrepare,
+      data: forecastProductsToPrepare,
       pageSize: 4,
     });
   return (
@@ -58,18 +53,15 @@ const TabForecast = () => {
               </span>
             </div>
           </div>
-          <div
-            className="flex items-center  h-80 justify-center rounded-lg border-2    border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400"
-          
-          >
-            Biểu đồ 
+          <div className="flex items-center h-80 justify-center rounded-lg border-2 border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
+            Biểu đồ
           </div>
         </Panel>
 
         {/* Kịch bản dự báo */}
         <Panel title="Kịch bản dự báo">
           <div className="space-y-3">
-            {forecastScenarios.map((s) => (
+            {forecastScenarioData.map((s) => (
               <div key={s.name} className="rounded-lg border border-gray-200 p-3">
                 <div className="text-xs text-gray-500">{s.name}</div>
                 <div className="mt-0.5 flex items-baseline justify-between">

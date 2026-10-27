@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
     parsed: "/address-parse/parsed",
   },
   blacklistMonitor: "/blacklist/monitor",
+  blacklistOrders: "/blacklist/orders",
   dashboardSummary: "/dashboard/summary",
   deliveryOrders: "/delivery-date/orders",
   telesaleRecords: "/telesale/records",

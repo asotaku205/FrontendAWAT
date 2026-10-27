@@ -5,7 +5,7 @@ import usePagination from "../../hooks/usePagination";
 import {
   businessSignals,
   realKpis,
-  recentOrders,
+  realRecentOrders,
 } from "../../mock/ForecastData";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
@@ -15,7 +15,7 @@ const statusClass: Record<string, string> = {
   "Đang giao": "bg-blue-100 text-blue-700",
   "Đơn hoàn": "bg-red-100 text-red-700",
 };
-const realColumns: TableColumn<(typeof recentOrders)[number]>[] = [
+const realColumns: TableColumn<(typeof realRecentOrders)[number]>[] = [
   { key: "id", title: "Mã đơn" },
   { key: "channel", title: "Kênh bán" },
   { key: "product", title: "Sản phẩm" },
@@ -43,7 +43,7 @@ const realColumns: TableColumn<(typeof recentOrders)[number]>[] = [
 const TabReal = () => {
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: recentOrders,
+      data: realRecentOrders,
       pageSize: 4,
     });
 

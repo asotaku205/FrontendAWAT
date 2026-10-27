@@ -3,13 +3,13 @@ import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import usePagination from "../../hooks/usePagination";
 import {
-  channelEfficiency,
+  channelEfficiencyData,
   channelKpis,
   channelsToOptimize,
 } from "../../mock/ForecastData";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
-const channelColumns: TableColumn<(typeof channelEfficiency)[number]>[] = [
+const channelColumns: TableColumn<(typeof channelEfficiencyData)[number]>[] = [
   { key: "channel", title: "Kênh" },
   { key: "cost", title: "Chi phí" },
   { key: "revenue", title: "Doanh thu" },
@@ -30,7 +30,7 @@ const channelColumns: TableColumn<(typeof channelEfficiency)[number]>[] = [
 const TabChannel = () => {
    const { currentData, totalPages, currentPage, setCurrentPage } =
       usePagination({
-        data: channelEfficiency,
+        data: channelEfficiencyData,
         pageSize: 4,
       });
   return (

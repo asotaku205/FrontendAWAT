@@ -1,10 +1,10 @@
 import { Button } from "../../components/ui/button";
 import {
-  channelRevenue,
-  featuredProducts,
-  kpis,
-  orderResults,
-  todayTodos,
+  overviewChannelRevenue,
+  overviewFeaturedProducts,
+  overviewKpis,
+  overviewOrderResults,
+  overviewTodos,
 } from "../../mock/ForecastData";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
@@ -13,7 +13,7 @@ const TabOverview = () => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
-        {kpis.map((k) => (
+        {overviewKpis.map((k) => (
           <KpiCard key={k.label} label={k.label} value={k.value} sub={k.sub} />
         ))}
       </div>
@@ -27,7 +27,7 @@ const TabOverview = () => {
         </Panel>
           <Panel title="Những việc cần làm" >
             <div className="space-y-3">
-              {todayTodos.map((t) => (
+              {overviewTodos.map((t) => (
                 <div key={t.rank} className="flex items-center gap-2 text-sm">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
                     {t.rank}
@@ -52,7 +52,7 @@ const TabOverview = () => {
         <Panel title="Doanh thu theo kênh" >
           
           <div className="space-y-3">
-            {channelRevenue.map((c) => (
+            {overviewChannelRevenue.map((c) => (
               <div key={c.name}>
                 <div className="mb-1 flex justify-between text-xs">
                   <span className="text-gray-700">{c.name}</span>
@@ -67,7 +67,7 @@ const TabOverview = () => {
 
          <Panel title="Hiệu quả đơn hàng" >
           <div className="space-y-3">
-            {orderResults.map((o) => (
+            {overviewOrderResults.map((o) => (
               <div key={o.label}>
                 <div className="mb-1 flex justify-between text-xs">
                   <span className="text-gray-700">{o.label}</span>
@@ -81,7 +81,7 @@ const TabOverview = () => {
         <Panel title="Sản phẩm nổi bật">
          
           <div className="space-y-2.5">
-            {featuredProducts.map((p) => (
+            {overviewFeaturedProducts.map((p) => (
               <div
                 key={p.code}
                 className="flex items-center justify-between text-sm"

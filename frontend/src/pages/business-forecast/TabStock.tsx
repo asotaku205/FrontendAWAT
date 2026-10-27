@@ -2,43 +2,32 @@ import { Button } from "../../components/ui/button";
 import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import usePagination from "../../hooks/usePagination";
-import { stockList, urgentStock, warehouseKpis } from "../../mock/ForecastData";
+import { stockInventoryData, urgentStock, warehouseKpis } from "../../mock/ForecastData";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
-const stockColumns: TableColumn<(typeof stockList)[number]>[] = [
-  { key: "code", title: "Mã đơn" },
-  { key: "name", title: "Sản phẩm" },
-  { key: "stock", title: "Tồn" },
-  {
-    key: "sold7d",
-    title: "Đơn bán được/tuần",
-  },
-  {
-    key: "forecast14d",
-    title: "Dự báo trong 14 ngày",
-  },
-  {
-    key: "daysLeft",
-    title: "Đủ hàng",
-  },
-  {
-    key: "status",
-    title: "Trạng thái",
-  },
-  {
-    key: "action",
-    title: "Hành động",
-    render: (o) => (
-      <Button size="xs" variant={"outline"}>
-        {o.action}
-      </Button>
-    ),
-  },
-];
+
 const TabStock = () => {
+  const stockColumns: TableColumn<(typeof stockInventoryData)[number]>[] = [
+    { key: "code", title: "Mã SP" },
+    { key: "name", title: "Sản phẩm" },
+    { key: "stock", title: "Tồn" },
+    { key: "sold7d", title: "Đơn bán được/tuần" },
+    { key: "forecast14d", title: "Dự báo trong 14 ngày" },
+    { key: "daysLeft", title: "Đủ hàng" },
+    { key: "status", title: "Trạng thái" },
+    {
+      key: "action",
+      title: "Hành động",
+      render: (o) => (
+        <Button size="xs" variant={"outline"}>
+          {o.action}
+        </Button>
+      ),
+    },
+  ];
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: stockList,
+      data: stockInventoryData,
       pageSize: 4,
     });
   return (
@@ -51,8 +40,7 @@ const TabStock = () => {
 
       <div className="grid grid-cols-3 gap-4">
         <Panel title="Số ngày đủ hàng theo nhóm" className="col-span-2 ">
-          <div className="text-xs text-gray-500 m-2">Mức an toàn: 14 ngày</div>
-
+          <div className="mb-3 text-xs text-gray-500">Mức an toàn: 14 ngày</div>
           <div className="flex items-center h-80 justify-center rounded-lg border-2  border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
             Biểu đồ
           </div>

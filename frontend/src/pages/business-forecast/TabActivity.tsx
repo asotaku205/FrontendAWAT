@@ -4,12 +4,12 @@ import usePagination from "../../hooks/usePagination";
 import {
   activityKpis,
   activityLog,
-  recentActivities,
-  upcomingTasks,
+  activityRecentData,
+  activityUpcomingTasks,
 } from "../../mock/ForecastData";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
-const activityColumns: TableColumn<(typeof recentActivities)[number]>[] = [
+const activityColumns: TableColumn<(typeof activityRecentData)[number]>[] = [
   { key: "time", title: "Thời gian" },
   { key: "activity", title: "Hoạt động" },
   { key: "group", title: "Nhóm" },
@@ -36,7 +36,7 @@ const activityColumns: TableColumn<(typeof recentActivities)[number]>[] = [
 const TabActivity = () => {
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: recentActivities,
+      data: activityRecentData,
       pageSize: 4,
     });
   return (
@@ -65,7 +65,7 @@ const TabActivity = () => {
 
         <Panel title="Công việc tiếp theo">
           <div className="space-y-3">
-            {upcomingTasks.map((t) => (
+            {activityUpcomingTasks.map((t) => (
               <div
                 key={t.text}
                 className="flex items-center justify-between gap-2 text-sm"

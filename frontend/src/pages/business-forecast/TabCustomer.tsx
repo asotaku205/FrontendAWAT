@@ -5,42 +5,27 @@ import usePagination from "../../hooks/usePagination";
 import {
   customerActions,
   customerKpis,
-  customersToWatch,
+  customerWatchList,
   returnReasons,
 } from "../../mock/ForecastData";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 
-const customerColumns: TableColumn<(typeof customersToWatch)[number]>[] = [
-  { key: "name", title: "Khách hàng / SĐT" },
-  { key: "group", title: "Nhóm" },
-  { key: "orders", title: "Số đơn" },
-  {
-    key: "avgValue",
-    title: "Giá trị TB",
-  },
-  {
-    key: "returnRate",
-    title: "Tỷ lệ hoàn",
-  },
-  {
-    key: "suggestion",
-    title: "Gợi ý xử lý",
-  },
-  {
-    key: "action",
-    title: "Trạng thái",
-    render: (o) => (
-      <Button size="xs" variant={"outline"}>
-        {o.action}
-      </Button>
-    ),
-  },
-];
 const TabCustomer = () => {
+  const customerColumns: TableColumn<(typeof customerWatchList)[number]>[] = [
+    { key: "name", title: "Khách hàng / SĐT" },
+    { key: "group", title: "Nhóm" },
+    { key: "orders", title: "Số đơn" },
+    { key: "avgValue", title: "Giá trị TB" },
+    { key: "returnRate", title: "Tỷ lệ hoàn" },
+    { key: "suggestion", title: "Gợi ý xử lý" },
+    { key: "action", title: "Trạng thái", render: (customer) => (
+      <Button size="xs" variant={"outline"}>{customer.action}</Button>
+    ) },
+  ];
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: customersToWatch,
+      data: customerWatchList,
       pageSize: 4,
     });
   return (

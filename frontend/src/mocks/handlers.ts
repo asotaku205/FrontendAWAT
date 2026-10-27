@@ -17,7 +17,6 @@ import type {
   TelesaleSummary,
   TelesaleWorkSummary,
 } from "../services/types";
-import { MonitorCustomerData } from "../mock/BlacklistData";
 import { AssignedOrderData } from "../mock/AssignedOrderData";
 import { AuditLogData } from "../mock/AuditLog";
 import { UnassignOrderData } from "../mock/UnassignOrderData";
@@ -45,6 +44,7 @@ import {
   warehouseEmployees,
 } from "../mock/OrderDistributionData";
 import type { AuthLoginRequest } from "../services/types";
+import { BlacklistOrderData } from "../mock/BlacklistData";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -56,7 +56,9 @@ const addAssignedWorkOrder = (
   order: (typeof TelesalePriorityOrders)[number],
   employeeName: string,
 ) => {
-  if (TelesaleWorkOrders.some(({ orderCode }) => orderCode === order.orderCode)) {
+  if (
+    TelesaleWorkOrders.some(({ orderCode }) => orderCode === order.orderCode)
+  ) {
     return;
   }
   TelesaleWorkOrders.push({
@@ -75,46 +77,49 @@ const addAssignedWorkOrder = (
 };
 
 export const handlers = [
-  http.post(`${API_BASE_URL}${API_ENDPOINTS.auth.login}`, async ({ request }) => {
-    const body: unknown = await request.json();
-    if (
-      typeof body !== "object" ||
-      body === null ||
-      !("email" in body) ||
-      !("password" in body) ||
-      typeof body.email !== "string" ||
-      typeof body.password !== "string"
-    ) {
-      return HttpResponse.json(
-        { message: "Vui lòng nhập email và mật khẩu." },
-        { status: 400 },
-      );
-    }
+  http.post(
+    `${API_BASE_URL}${API_ENDPOINTS.auth.login}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (
+        typeof body !== "object" ||
+        body === null ||
+        !("email" in body) ||
+        !("password" in body) ||
+        typeof body.email !== "string" ||
+        typeof body.password !== "string"
+      ) {
+        return HttpResponse.json(
+          { message: "Vui lòng nhập email và mật khẩu." },
+          { status: 400 },
+        );
+      }
 
-    const credentials: AuthLoginRequest = {
-      email: body.email.trim().toLowerCase(),
-      password: body.password,
-    };
-    if (
-      credentials.email !== "admin@awat.vn" ||
-      credentials.password !== "awat123"
-    ) {
-      return HttpResponse.json(
-        { message: "Email hoặc mật khẩu không chính xác." },
-        { status: 401 },
-      );
-    }
+      const credentials: AuthLoginRequest = {
+        email: body.email.trim().toLowerCase(),
+        password: body.password,
+      };
+      if (
+        credentials.email !== "admin@awat.vn" ||
+        credentials.password !== "awat123"
+      ) {
+        return HttpResponse.json(
+          { message: "Email hoặc mật khẩu không chính xác." },
+          { status: 401 },
+        );
+      }
 
-    return HttpResponse.json({
-      accessToken: "mock-access-token",
-      user: {
-        id: "user-001",
-        email: credentials.email,
-        name: "Quản trị viên",
-        role: "Quản trị hệ thống",
-      },
-    });
-  }),
+      return HttpResponse.json({
+        accessToken: "mock-access-token",
+        user: {
+          id: "user-001",
+          email: credentials.email,
+          name: "Quản trị viên",
+          role: "Quản trị hệ thống",
+        },
+      });
+    },
+  ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.addressParse.options}`, () =>
     HttpResponse.json({
       city,
@@ -129,9 +134,7 @@ export const handlers = [
   http.get(`${API_BASE_URL}${API_ENDPOINTS.addressParse.parsed}`, () =>
     HttpResponse.json(AddressParseData),
   ),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.blacklistMonitor}`, () =>
-    HttpResponse.json(MonitorCustomerData),
-  ),
+
   http.get(`${API_BASE_URL}${API_ENDPOINTS.dashboardSummary}`, () =>
     HttpResponse.json(DashboardSummaryData),
   ),
@@ -141,23 +144,28 @@ export const handlers = [
   http.get(`${API_BASE_URL}${API_ENDPOINTS.telesaleRecords}`, () =>
     HttpResponse.json(TelesaleData),
   ),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.telesaleAssignment.orders}`, ({ request }) => {
-    const params = new URL(request.url).searchParams;
-    const status = params.get("status");
-    const deliveryDate = params.get("deliveryDate");
-    const search = params.get("search")?.trim().toLocaleLowerCase("vi-VN") ?? "";
-    const orders = TelesalePriorityOrders.filter((order) => {
-      const matchesStatus = !status || order.status === status;
-      const matchesDate =
-        !deliveryDate || order.expectedDelivery === deliveryDate;
-      const normalizedText =
-        `${order.orderCode} ${order.waybill} ${order.customerName} ${order.phoneNumber}`
-          .toLocaleLowerCase("vi-VN");
-      const matchesSearch = !search || normalizedText.includes(search);
-      return matchesStatus && matchesDate && matchesSearch;
-    });
-    return HttpResponse.json(orders);
-  }),
+  http.get(
+    `${API_BASE_URL}${API_ENDPOINTS.telesaleAssignment.orders}`,
+    ({ request }) => {
+      const params = new URL(request.url).searchParams;
+      const status = params.get("status");
+      const deliveryDate = params.get("deliveryDate");
+      const search =
+        params.get("search")?.trim().toLocaleLowerCase("vi-VN") ?? "";
+      const orders = TelesalePriorityOrders.filter((order) => {
+        const matchesStatus = !status || order.status === status;
+        const matchesDate =
+          !deliveryDate || order.expectedDelivery === deliveryDate;
+        const normalizedText =
+          `${order.orderCode} ${order.waybill} ${order.customerName} ${order.phoneNumber}`.toLocaleLowerCase(
+            "vi-VN",
+          );
+        const matchesSearch = !search || normalizedText.includes(search);
+        return matchesStatus && matchesDate && matchesSearch;
+      });
+      return HttpResponse.json(orders);
+    },
+  ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.telesaleAssignment.agents}`, () =>
     HttpResponse.json(TelesaleAssignmentAgents),
   ),
@@ -178,22 +186,29 @@ export const handlers = [
     };
     return HttpResponse.json(summary);
   }),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.telesaleAssignment.workSummary}`, ({ request }) => {
-    const employeeName =
-      new URL(request.url).searchParams.get("employeeName")?.trim() ||
-      TelesaleWorkSummaryData.employeeName;
-    if (!TelesaleAssignmentAgents.some(({ employeeName: name }) => name === employeeName)) {
-      return HttpResponse.json(
-        { message: "Telesale employee was not found." },
-        { status: 404 },
-      );
-    }
-    const summary: TelesaleWorkSummary = {
-      ...TelesaleWorkSummaryData,
-      employeeName,
-    };
-    return HttpResponse.json(summary);
-  }),
+  http.get(
+    `${API_BASE_URL}${API_ENDPOINTS.telesaleAssignment.workSummary}`,
+    ({ request }) => {
+      const employeeName =
+        new URL(request.url).searchParams.get("employeeName")?.trim() ||
+        TelesaleWorkSummaryData.employeeName;
+      if (
+        !TelesaleAssignmentAgents.some(
+          ({ employeeName: name }) => name === employeeName,
+        )
+      ) {
+        return HttpResponse.json(
+          { message: "Telesale employee was not found." },
+          { status: 404 },
+        );
+      }
+      const summary: TelesaleWorkSummary = {
+        ...TelesaleWorkSummaryData,
+        employeeName,
+      };
+      return HttpResponse.json(summary);
+    },
+  ),
   http.post(
     `${API_BASE_URL}${API_ENDPOINTS.telesaleAssignment.autoAssign}`,
     async ({ request }) => {
@@ -205,10 +220,7 @@ export const handlers = [
         );
       }
       const { employeeIds, orderCodes } = body;
-      if (
-        !isStringArray(employeeIds) ||
-        !isStringArray(orderCodes)
-      ) {
+      if (!isStringArray(employeeIds) || !isStringArray(orderCodes)) {
         return HttpResponse.json(
           { message: "Danh sách nhân viên và đơn hàng không hợp lệ." },
           { status: 400 },
@@ -217,8 +229,7 @@ export const handlers = [
 
       const selectedAgents = TelesaleAssignmentAgents.filter(
         (agent) =>
-          employeeIds.includes(agent.employeeId) &&
-          agent.status === "Đang làm",
+          employeeIds.includes(agent.employeeId) && agent.status === "Đang làm",
       );
       if (selectedAgents.length === 0) {
         return HttpResponse.json(
@@ -256,10 +267,7 @@ export const handlers = [
         );
       }
       const { employeeId, orderCodes } = body;
-      if (
-        !isStringArray(orderCodes) ||
-        typeof employeeId !== "string"
-      ) {
+      if (!isStringArray(orderCodes) || typeof employeeId !== "string") {
         return HttpResponse.json(
           { message: "Thông tin phân công đơn không hợp lệ." },
           { status: 400 },
@@ -296,8 +304,7 @@ export const handlers = [
         new URL(request.url).searchParams.get("employeeName")?.trim() ?? "";
       return HttpResponse.json(
         TelesaleWorkOrders.filter(
-          (order) =>
-            !employeeName || order.employeeName === employeeName,
+          (order) => !employeeName || order.employeeName === employeeName,
         ),
       );
     },
@@ -349,9 +356,9 @@ export const handlers = [
         (typeof body.autoAccept !== "boolean" &&
           body.status !== "Đang làm" &&
           body.status !== "Nghỉ" &&
-          (body.priority !== "Theo ETA" &&
-            body.priority !== "Theo số đơn" &&
-            body.priority !== "Thủ công"))
+          body.priority !== "Theo ETA" &&
+          body.priority !== "Theo số đơn" &&
+          body.priority !== "Thủ công")
       ) {
         return HttpResponse.json(
           { message: "Thông tin trạng thái nhận đơn không hợp lệ." },
@@ -391,8 +398,7 @@ export const handlers = [
       ? TelesaleCallData.filter((call) => call.employeeName === employeeName)
       : TelesaleCallData;
     const calls: TelesaleCallRecord[] = selectedCalls.map((call) => {
-      const timeOf = (value?: string | null) =>
-        value?.split(" ")[1] ?? "—";
+      const timeOf = (value?: string | null) => value?.split(" ")[1] ?? "—";
       const duration = `${Math.floor(call.durationSeconds / 60)}p${String(
         call.durationSeconds % 60,
       ).padStart(2, "0")}`;
@@ -463,15 +469,23 @@ export const handlers = [
   ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.telesaleEmployeeOptions}`, () => {
     const options: TelesaleEmployeeFilterOptions = {
-      employees: [...new Set(TelesaleEmployeeData.map(({ employeeName }) => employeeName))],
+      employees: [
+        ...new Set(
+          TelesaleEmployeeData.map(({ employeeName }) => employeeName),
+        ),
+      ],
       receivingStatuses: [
-        ...new Set(TelesaleEmployeeData.map(({ receivingStatus }) => receivingStatus)),
+        ...new Set(
+          TelesaleEmployeeData.map(({ receivingStatus }) => receivingStatus),
+        ),
       ],
       callStatuses: [
         ...new Set(TelesaleEmployeeData.map(({ callStatus }) => callStatus)),
       ],
       workingStatuses: [
-        ...new Set(TelesaleEmployeeData.map(({ workingStatus }) => workingStatus)),
+        ...new Set(
+          TelesaleEmployeeData.map(({ workingStatus }) => workingStatus),
+        ),
       ].map((workingStatus) => ({
         label: workingStatus ? "Đang đi làm" : "Đã nghỉ",
         value: workingStatus ? "true" : "false",
@@ -479,47 +493,55 @@ export const handlers = [
     };
     return HttpResponse.json(options);
   }),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.telesaleEmployees}`, ({ request }) => {
-    const params = new URL(request.url).searchParams;
-    const search = params.get("search")?.trim().toLocaleLowerCase("vi-VN") ?? "";
-    const employeeName = params.get("employeeName");
-    const receivingStatus = params.get("receivingStatus");
-    const callStatus = params.get("callStatus");
-    const workingStatus = params.get("workingStatus");
-    const normalize = (value: string) =>
-      value
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g, "d")
-        .replace(/Đ/g, "D")
-        .toLocaleLowerCase("vi-VN");
-    const normalizedSearch = normalize(search);
-    const normalizedEmployeeName = employeeName ? normalize(employeeName) : "";
-    const employees = TelesaleEmployeeData.map((employee) => ({
-      ...employee,
-      pausedSeconds: employee.workingStatus ? 34 * 60 : 0,
-    })).filter((employee) => {
-      const matchesSearch =
-        !normalizedSearch || normalize(employee.employeeName).includes(normalizedSearch);
-      const matchesEmployee =
-        !normalizedEmployeeName ||
-        normalize(employee.employeeName) === normalizedEmployeeName;
-      const matchesReceivingStatus =
-        !receivingStatus || employee.receivingStatus === receivingStatus;
-      const matchesCallStatus = !callStatus || employee.callStatus === callStatus;
-      const matchesWorkingStatus =
-        (workingStatus !== "true" && workingStatus !== "false") ||
-        employee.workingStatus === (workingStatus === "true");
-      return (
-        matchesSearch &&
-        matchesEmployee &&
-        matchesReceivingStatus &&
-        matchesCallStatus &&
-        matchesWorkingStatus
-      );
-    });
-    return HttpResponse.json(employees);
-  }),
+  http.get(
+    `${API_BASE_URL}${API_ENDPOINTS.telesaleEmployees}`,
+    ({ request }) => {
+      const params = new URL(request.url).searchParams;
+      const search =
+        params.get("search")?.trim().toLocaleLowerCase("vi-VN") ?? "";
+      const employeeName = params.get("employeeName");
+      const receivingStatus = params.get("receivingStatus");
+      const callStatus = params.get("callStatus");
+      const workingStatus = params.get("workingStatus");
+      const normalize = (value: string) =>
+        value
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/đ/g, "d")
+          .replace(/Đ/g, "D")
+          .toLocaleLowerCase("vi-VN");
+      const normalizedSearch = normalize(search);
+      const normalizedEmployeeName = employeeName
+        ? normalize(employeeName)
+        : "";
+      const employees = TelesaleEmployeeData.map((employee) => ({
+        ...employee,
+        pausedSeconds: employee.workingStatus ? 34 * 60 : 0,
+      })).filter((employee) => {
+        const matchesSearch =
+          !normalizedSearch ||
+          normalize(employee.employeeName).includes(normalizedSearch);
+        const matchesEmployee =
+          !normalizedEmployeeName ||
+          normalize(employee.employeeName) === normalizedEmployeeName;
+        const matchesReceivingStatus =
+          !receivingStatus || employee.receivingStatus === receivingStatus;
+        const matchesCallStatus =
+          !callStatus || employee.callStatus === callStatus;
+        const matchesWorkingStatus =
+          (workingStatus !== "true" && workingStatus !== "false") ||
+          employee.workingStatus === (workingStatus === "true");
+        return (
+          matchesSearch &&
+          matchesEmployee &&
+          matchesReceivingStatus &&
+          matchesCallStatus &&
+          matchesWorkingStatus
+        );
+      });
+      return HttpResponse.json(employees);
+    },
+  ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.telesaleSummary}`, () => {
     const totals = TelesaleEmployeeData.filter(
       (employee) => employee.workingStatus,
@@ -531,8 +553,10 @@ export const handlers = [
           (Number(hours) * 60 + Number(minutes)) * 60;
         summary.totalCallsToday += employee.totalCalls;
         summary.successfulCalls += employee.successfulCalls;
-        summary.activeEmployees += employee.receivingStatus === "Đang nhận" ? 1 : 0;
-        summary.pausedEmployees += employee.receivingStatus === "Tạm dừng" ? 1 : 0;
+        summary.activeEmployees +=
+          employee.receivingStatus === "Đang nhận" ? 1 : 0;
+        summary.pausedEmployees +=
+          employee.receivingStatus === "Tạm dừng" ? 1 : 0;
         return summary;
       },
       {
@@ -550,13 +574,13 @@ export const handlers = [
           : Math.round(totals.totalCallTimeSeconds / totals.totalCallsToday),
       totalCallsToday: totals.totalCallsToday,
       successfulCalls: totals.successfulCalls,
-      failedCalls:
-        totals.totalCallsToday -
-        totals.successfulCalls,
+      failedCalls: totals.totalCallsToday - totals.successfulCalls,
       successRate:
         totals.totalCallsToday === 0
           ? 0
-          : Math.round((totals.successfulCalls / totals.totalCallsToday) * 1000) / 10,
+          : Math.round(
+              (totals.successfulCalls / totals.totalCallsToday) * 1000,
+            ) / 10,
       activeEmployees: totals.activeEmployees,
       pausedEmployees: totals.pausedEmployees,
     };
@@ -592,16 +616,32 @@ export const handlers = [
   http.get(`${API_BASE_URL}${API_ENDPOINTS.orderDistribution.workers}`, () =>
     HttpResponse.json(workerProgress),
   ),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.orderDistribution.readyOrders}`, () =>
-    HttpResponse.json(readyOrdersSummary),
+  http.get(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.readyOrders}`,
+    () => HttpResponse.json(readyOrdersSummary),
   ),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.orderDistribution.recommendation}`, () =>
-    HttpResponse.json(distributionRecommendation),
+  http.get(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.recommendation}`,
+    () => HttpResponse.json(distributionRecommendation),
   ),
-  http.get(`${API_BASE_URL}${API_ENDPOINTS.orderDistribution.printRequest}`, () =>
-    HttpResponse.json(printRequest),
+  http.get(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.printRequest}`,
+    () => HttpResponse.json(printRequest),
   ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.orderDistribution.employees}`, () =>
     HttpResponse.json(warehouseEmployees),
   ),
+  http.get(`${API_BASE_URL}${API_ENDPOINTS.blacklistOrders}`, ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get("status");
+    const orderSource = url.searchParams.get("orderSource");
+    const filteredOrders = BlacklistOrderData.filter((order) => {
+      const checkStatus =
+        !status || status === "all" || order.status === status;
+      const checkOrderSource =
+        !orderSource ||  orderSource === "all" || order.orderSource === orderSource;
+        return checkStatus && checkOrderSource
+    });
+    return HttpResponse.json(filteredOrders);
+  }),
 ];

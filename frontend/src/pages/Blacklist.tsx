@@ -1,21 +1,18 @@
 import { useState } from "react";
-import {
-  initialOrders,
-  statusBadgeClass,
-  needsDecision,
-  type OrderStatus,
-  type CheckOrder,
-} from "../mock/BlacklistData";
+import { statusBadgeClass } from "../mock/BlacklistData";
+import type { BlacklistOrder, BlacklistOrderStatus } from "../services/types";
 import usePagination from "../hooks/usePagination";
 import OrderDetailModal from "./Blacklist/OrderDetailModal";
 import type { TableColumn } from "../components/ui/Table";
 import Panel from "./business-forecast/components/Panel";
 import Table from "../components/ui/Table";
 import { Button } from "../components/ui/button";
+import { API_ENDPOINTS } from "../services/api";
+import useApiData from "../hooks/useApiData";
+import Modal from "../components/ui/Modal";
 
-const STATUS_FILTERS: ("all" | OrderStatus)[] = [
+const STATUS_FILTERS: ("all" | BlacklistOrderStatus)[] = [
   "all",
-  "Chờ kiểm tra",
   "Đã kiểm tra",
   "Hoàn nhiều lần",
   "Blacklist",
@@ -23,71 +20,139 @@ const STATUS_FILTERS: ("all" | OrderStatus)[] = [
 ];
 
 const BlacklistCheck = () => {
-  const [rows, setRows] = useState<CheckOrder[]>(initialOrders);
+  type Decision = { action: "go" | "cancel"; orderCodes: string[] };
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [detailId, setDetailId] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | BlacklistOrderStatus
+  >("all");
   const [sourceFilter, setSourceFilter] = useState("all");
   const [query, setQuery] = useState("");
-  const blacklistColumns: TableColumn<CheckOrder>[] = [
-    { key: "id", title: "Mã đơn" },
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [statusUpdates, setStatusUpdates] = useState<
+    Record<string, BlacklistOrderStatus>
+  >({});
+  const [pendingDecision, setPendingDecision] = useState<Decision | null>(null);
+  const params = new URLSearchParams();
+  if (statusFilter !== "all") {
+    params.set("status", statusFilter);
+  }
+  if (sourceFilter !== "all") {
+    params.set("orderSource", sourceFilter);
+  }
+  const queryString = params.toString();
+  const blacklistEndpoint = queryString
+    ? `${API_ENDPOINTS.blacklistOrders}?${queryString}`
+    : API_ENDPOINTS.blacklistOrders;
+
+  const {
+    data: blacklistOrderData,
+    error,
+    isLoading,
+  } = useApiData<BlacklistOrder[]>(blacklistEndpoint);
+  const rows = blacklistOrderData ?? [];
+  const updatedRows = rows.map((order) => ({
+    ...order,
+    status: statusUpdates[order.orderCode] ?? order.status,
+  }));
+  const reviewOrders = updatedRows.filter(
+    (order) =>
+      order.status === "Blacklist" || order.status === "Hoàn nhiều lần",
+  );
+  const filtered = updatedRows.filter((r) => {
+    if (
+      isReviewing &&
+      r.status !== "Blacklist" &&
+      r.status !== "Hoàn nhiều lần"
+    ) {
+      return false;
+    }
+    if (
+      query &&
+      !r.orderCode.toLowerCase().includes(query.toLowerCase()) &&
+      !r.phoneNumber.includes(query)
+    )
+      return false;
+    return true;
+  });
+  const { currentData, totalPages, currentPage, setCurrentPage } =
+    usePagination({
+      data: filtered,
+      pageSize: 8,
+    });
+
+  if (isLoading)
+    return <p role="status">Đang tải danh sách đơn blacklist...</p>;
+  if (error || !blacklistOrderData) {
+    return (
+      <p role="alert">
+        Không tải được dữ liệu: {error ?? "Phản hồi API không hợp lệ."}
+      </p>
+    );
+  }
+  const blacklistColumns: TableColumn<BlacklistOrder>[] = [
+    { key: "orderCode", title: "Mã đơn" },
     { key: "orderDate", title: "Ngày đặt hàng" },
-    { key: "customer", title: "Tên khách hàng" },
+    { key: "customerName", title: "Tên khách hàng" },
     {
-      key: "phone",
+      key: "phoneNumber",
       title: "Số điện thoại",
     },
     {
-      key: "product",
+      key: "productName",
       title: "Tên sản phẩm",
       render: (o) => (
         <div>
-          <div>{o.product}</div>
-          <div className="text-xs text-gray-400">{o.refundRateNote}</div>
+          <div>{o.productName}</div>
+          <div className="text-xs text-gray-400">{o.refundRateSummary}</div>
         </div>
       ),
     },
 
     {
-      key: "refundRate1m",
+      key: "refundRateLastMonth",
       title: "Tỉ lệ hoàn 1 tháng",
       render: (o) => (
         <span
           className={
-            o.refundRate1m > 60 ? "font-medium text-red-600" : "text-green-600"
+            o.refundRateLastMonth > 60
+              ? "font-medium text-red-600"
+              : "text-green-600"
           }
         >
-          {o.refundRate1m}%
+          {o.refundRateLastMonth}%
         </span>
       ),
     },
     {
-      key: "refundRate3m",
+      key: "refundRateLast3Months",
       title: "Tỉ lệ hoàn 3 tháng",
       render: (o) => (
         <span
           className={
-            o.refundRate3m > 60 ? "font-medium text-red-600" : "text-green-600"
+            o.refundRateLast3Months > 60
+              ? "font-medium text-red-600"
+              : "text-green-600"
           }
         >
-          {o.refundRate3m}%
+          {o.refundRateLast3Months}%
         </span>
       ),
     },
     {
-      key: "qty",
+      key: "quantity",
       title: "Số lượng",
     },
     {
-      key: "amount",
+      key: "orderValue",
       title: "Giá trị đơn hàng",
     },
     {
-      key: "source",
+      key: "orderSource",
       title: "Nguồn đơn",
     },
     {
-      key: "adsStaff",
+      key: "adsStaffName",
       title: "Tên NV ADS",
     },
     {
@@ -102,39 +167,46 @@ const BlacklistCheck = () => {
       ),
     },
     {
-      key: "id",
+      key: "orderCode",
       id: "action", //tránh trùng React key với cột Mã đơn
       title: "",
       render: (o) => (
-        <Button variant="link" size="sm" onClick={() => setDetailId(o.id)}>
+        <Button
+          variant="link"
+          size="sm"
+          onClick={() => setDetailId(o.orderCode)}
+        >
           Chi tiết
         </Button>
       ),
     },
   ];
 
-  const filtered = rows.filter((r) => {
-    if (statusFilter !== "all" && r.status !== statusFilter) return false;
-    if (sourceFilter !== "all" && r.source !== sourceFilter) return false;
-    if (
-      query &&
-      !r.id.toLowerCase().includes(query.toLowerCase()) &&
-      !r.phone.includes(query)
-    )
-      return false;
-    return true;
-  });
+  const askForDecision = (action: Decision["action"], orderCodes: string[]) => {
+    if (orderCodes.length > 0) setPendingDecision({ action, orderCodes });
+  };
 
-  const { currentData, totalPages, currentPage, setCurrentPage } =
-    usePagination({
-      data: filtered,
-      pageSize: 8,
+  const confirmDecision = () => {
+    if (!pendingDecision) return;
+    const nextStatus =
+      pendingDecision.action === "go" ? "Đã kiểm tra" : "Đã hủy";
+    setStatusUpdates((current) => {
+      const updates = { ...current };
+      pendingDecision.orderCodes.forEach((code) => {
+        updates[code] = nextStatus;
+      });
+      return updates;
     });
+    setSelectedIds([]);
+    setPendingDecision(null);
+    setDetailId(null);
+    setCurrentPage(1);
+  };
 
-  const countBy = (s: OrderStatus) => rows.filter((r) => r.status === s).length;
+  const countBy = (s: BlacklistOrderStatus) =>
+    updatedRows.filter((r) => r.status === s).length;
   const kpis = [
-    { label: "Tất cả trạng thái", value: rows.length },
-    { label: "Chờ kiểm tra", value: countBy("Chờ kiểm tra") },
+    { label: "Tất cả trạng thái", value: updatedRows.length },
     { label: "Đã kiểm tra", value: countBy("Đã kiểm tra") },
     { label: "Hoàn nhiều lần", value: countBy("Hoàn nhiều lần") },
     { label: "Blacklist", value: countBy("Blacklist") },
@@ -142,18 +214,18 @@ const BlacklistCheck = () => {
   ];
 
   const toggleSelection = (id: string) => {
-  setSelectedIds((prev) =>
-    prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-  );
-};
- const toggleAll = () =>
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+  const toggleAll = () =>
     setSelectedIds((selected) =>
       selected.length === filtered.length
         ? []
-        : filtered.map(({ id }) => id),
+        : filtered.map(({ orderCode }) => orderCode),
     );
 
-  const detailOrder = rows.find((r) => r.id === detailId) ?? null;
+  const detailOrder = updatedRows.find((r) => r.orderCode === detailId) ?? null;
 
   return (
     <div className="space-y-4">
@@ -177,7 +249,23 @@ const BlacklistCheck = () => {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button>Check Hoàn nhiều lần</Button>
+        <Button
+          variant={isReviewing ? "outline" : "default"}
+          onClick={() => {
+            const nextReviewMode = !isReviewing;
+            setIsReviewing(nextReviewMode);
+            setStatusFilter("all");
+            setSourceFilter("all");
+            setQuery("");
+            setSelectedIds([]);
+            setCurrentPage(1);
+          }}
+        >
+          {isReviewing ? "Quay lại danh sách đơn" : "Check Hoàn nhiều lần"}
+        </Button>
+        <span className="text-xs text-gray-500">
+          {reviewOrders.length} đơn cần quyết định
+        </span>
         <select
           value={sourceFilter}
           onChange={(e) => setSourceFilter(e.target.value)}
@@ -190,7 +278,7 @@ const BlacklistCheck = () => {
         <select
           value={statusFilter}
           onChange={(e) =>
-            setStatusFilter(e.target.value as "all" | OrderStatus)
+            setStatusFilter(e.target.value as "all" | BlacklistOrderStatus)
           }
           className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
         >
@@ -212,14 +300,19 @@ const BlacklistCheck = () => {
         />
       </div>
 
-      {selectedIds.length > 0 && (
+      {isReviewing && selectedIds.length > 0 && (
         <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-2.5">
           <span className="text-sm text-gray-700">
             Đã chọn <span className="font-bold">{selectedIds.length}</span> đơn
           </span>
-          <Button onClick={() => setSelectedIds([])}>Duyệt đi đơn</Button>
-          <Button onClick={() => setSelectedIds([])} variant={"outline"}>
-            Huỷ đơn
+          <Button onClick={() => askForDecision("go", selectedIds)}>
+            Đi đơn
+          </Button>
+          <Button
+            onClick={() => askForDecision("cancel", selectedIds)}
+            variant="destructive"
+          >
+            Hủy đơn
           </Button>
           <span className="text-xs text-gray-400">
             (chỉ áp dụng cho đơn Blacklist / Hoàn nhiều lần)
@@ -227,30 +320,42 @@ const BlacklistCheck = () => {
         </div>
       )}
 
-      <Panel title=" Danh sách tất cả đơn check HNL &amp; Blacklist">
+      <Panel
+        title={
+          isReviewing
+            ? "Đơn Blacklist và hoàn nhiều lần cần quyết định"
+            : "Danh sách tất cả đơn check HNL & Blacklist"
+        }
+      >
         <Table
           columns={blacklistColumns}
           records={currentData}
-          rowKey="id"
-          selection={{
-            header: (
-              <input
-                type="checkbox"
-                checked={
-                  currentData.length > 0 &&
-                  currentData.every((r) => selectedIds.includes(r.id))
+          rowKey="orderCode"
+          selection={
+            isReviewing
+              ? {
+                  header: (
+                    <input
+                      type="checkbox"
+                      checked={
+                        currentData.length > 0 &&
+                        currentData.every((r) =>
+                          selectedIds.includes(r.orderCode),
+                        )
+                      }
+                      onChange={toggleAll}
+                    />
+                  ),
+                  render: (o) => (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(o.orderCode)}
+                      onChange={() => toggleSelection(o.orderCode)}
+                    />
+                  ),
                 }
-                onChange={toggleAll}
-              />
-            ),
-            render: (o) => (
-              <input
-                type="checkbox"
-                checked={selectedIds.includes(o.id)}
-                onChange={() => toggleSelection(o.id)}
-              />
-            ),
-          }}
+              : undefined
+          }
           pagination={{
             page: currentPage,
             pageSize: 8,
@@ -263,7 +368,39 @@ const BlacklistCheck = () => {
       <OrderDetailModal
         order={detailOrder}
         onClose={() => setDetailId(null)}
+        onDecision={(action, order) => {
+          setDetailId(null);
+          askForDecision(action, [order.orderCode]);
+        }}
       />
+      <Modal
+        title={
+          pendingDecision?.action === "go"
+            ? "Xác nhận đi đơn"
+            : "Xác nhận hủy đơn"
+        }
+        open={pendingDecision !== null}
+        onClose={() => setPendingDecision(null)}
+      >
+        <p className="text-sm text-gray-700">
+          {pendingDecision?.action === "go"
+            ? `Bạn xác nhận cho ${pendingDecision.orderCodes.length} đơn được đi? Trạng thái sẽ chuyển thành “Đã kiểm tra”.`
+            : `Bạn xác nhận hủy ${pendingDecision?.orderCodes.length} đơn đã chọn? Trạng thái sẽ chuyển thành “Đã hủy”.`}
+        </p>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setPendingDecision(null)}>
+            Quay lại
+          </Button>
+          <Button
+            variant={
+              pendingDecision?.action === "cancel" ? "destructive" : "default"
+            }
+            onClick={confirmDecision}
+          >
+            Xác nhận
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
