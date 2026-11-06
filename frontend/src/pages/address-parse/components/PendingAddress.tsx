@@ -1,9 +1,12 @@
+import axios from "axios";
 import { useState } from "react";
 import { Button } from "../../../components/ui/button";
 import usePagination from "../../../hooks/usePagination";
 import useApiData from "../../../hooks/useApiData";
-import { API_ENDPOINTS } from "../../../services/api";
+import { API_ENDPOINTS, apiPost } from "../../../services/api";
 import type {
+  AddressParseDataType,
+  AddressParseOrdersRequest,
   AddressParseOptions,
   PendingAddressDataType,
 } from "../../../services/types";
@@ -20,9 +23,14 @@ const PendingAddress = ({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showParseModal, setShowParseModal] = useState(false);
   const [showParseAllModal, setShowParseAllModal] = useState(false);
+  const [processedIds, setProcessedIds] = useState<string[]>([]);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
   const { data: pendingAddresses, error, isLoading } =
     useApiData<PendingAddressDataType[]>(API_ENDPOINTS.addressParse.pending);
-  const records = pendingAddresses ?? [];
+  const records = (pendingAddresses ?? []).filter(
+    ({ orderCode }) => !processedIds.includes(orderCode),
+  );
   const { currentData, totalPages, currentPage, setCurrentPage } = usePagination({
     data: records,
     pageSize: 5,
@@ -41,6 +49,36 @@ const PendingAddress = ({
         ? []
         : records.map(({ orderCode }) => orderCode),
     );
+
+  const parseOrders = async (orderCodes: string[]) => {
+    if (isParsing || orderCodes.length === 0) return;
+    setParseError(null);
+    setIsParsing(true);
+    try {
+      await apiPost<AddressParseDataType[], AddressParseOrdersRequest>(
+        API_ENDPOINTS.addressParse.parse,
+        { orderCodes },
+      );
+      setProcessedIds((current) => [...new Set([...current, ...orderCodes])]);
+      setSelectedIds([]);
+      setShowParseModal(false);
+      setShowParseAllModal(false);
+    } catch (requestError: unknown) {
+      const responseMessage = axios.isAxiosError<{ message?: string }>(
+        requestError,
+      )
+        ? requestError.response?.data?.message
+        : undefined;
+      setParseError(
+        responseMessage ??
+          (requestError instanceof Error
+            ? requestError.message
+            : "Không thể tách địa chỉ."),
+      );
+    } finally {
+      setIsParsing(false);
+    }
+  };
 
   if (isLoading) return <p role="status">Đang tải địa chỉ chờ tách...</p>;
   if (error) return <p role="alert">Không tải được địa chỉ chờ tách: {error}</p>;
@@ -79,10 +117,19 @@ const PendingAddress = ({
         <ParseModal
           selectedIds={selectedIds}
           setIsParseModalOpen={setShowParseModal}
+          onConfirm={() => void parseOrders(selectedIds)}
+          isSubmitting={isParsing}
+          error={parseError}
         />
       )}
       {showParseAllModal && (
-        <ParseAllModal setIsParseAllModalOpen={setShowParseAllModal} />
+        <ParseAllModal
+          setIsParseAllModalOpen={setShowParseAllModal}
+          onConfirm={(orderCodes) => void parseOrders(orderCodes)}
+          isSubmitting={isParsing}
+          error={parseError}
+          records={records}
+        />
       )}
     </>
   );

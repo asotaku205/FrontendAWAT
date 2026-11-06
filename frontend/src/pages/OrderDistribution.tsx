@@ -39,14 +39,20 @@ const OrderDistribution = () => {
   const [tabOpen, setTabOpen] = useState<OrderDistributionTab>("all");
   const [isAssignProposalModalOpen, setAssignProposalModalOpen] = useState(false);
   const [isPrintOrderModalOpen, setPrintOrderModalOpen] = useState(false);
+  const [printRequestRefresh, setPrintRequestRefresh] = useState(0);
+  const [distributionRefresh, setDistributionRefresh] = useState(0);
   const { data: auditLog, error: auditLogError, isLoading: isAuditLogLoading } =
-    useApiData<AuditLogRecord[]>(API_ENDPOINTS.orderDistribution.auditLog);
+    useApiData<AuditLogRecord[]>(
+      `${API_ENDPOINTS.orderDistribution.auditLog}?refresh=${distributionRefresh}`,
+    );
   const { data: recommendation, error: recommendationError } =
-    useApiData<DistributionRecommendation>(
-      API_ENDPOINTS.orderDistribution.recommendation,
+    useApiData<DistributionRecommendation | null>(
+      `${API_ENDPOINTS.orderDistribution.recommendation}?refresh=${distributionRefresh}`,
     );
   const { data: printRequest, error: printRequestError } =
-    useApiData<PrintRequest>(API_ENDPOINTS.orderDistribution.printRequest);
+    useApiData<PrintRequest | null>(
+      `${API_ENDPOINTS.orderDistribution.printRequest}?refresh=${printRequestRefresh}`,
+    );
   const auditRecords = auditLog ?? [];
   const { currentData, totalPages, currentPage, setCurrentPage } = usePagination({
     data: auditRecords,
@@ -104,7 +110,7 @@ const OrderDistribution = () => {
             </span>
           </p>
         ) : (
-          <p role="status">Đang tải đề xuất phân công...</p>
+          <p>Hiện không có đề xuất phân công cần duyệt.</p>
         )}
         <Button
           type="button"
@@ -125,7 +131,7 @@ const OrderDistribution = () => {
             {printRequest.nextBlockCount} phiếu
           </p>
         ) : (
-          <p role="status">Đang tải yêu cầu in...</p>
+          <p>Hiện không có yêu cầu in mới.</p>
         )}
         <Button
           type="button"
@@ -142,6 +148,7 @@ const OrderDistribution = () => {
         <ProcessTab
           onViewAll={() => setTabOpen("all")}
           printRequest={printRequest}
+          onPrintConfirmed={() => setPrintRequestRefresh((current) => current + 1)}
         />
       ) : (
         <EmployeesTab />
@@ -172,13 +179,21 @@ const OrderDistribution = () => {
       {isAssignProposalModalOpen && recommendation && (
         <AssignProposalModal
           recommendation={recommendation}
-          setIsAgssignProposalModalOpen={setAssignProposalModalOpen}
+          setIsAssignProposalModalOpen={setAssignProposalModalOpen}
+          onConfirmed={() => {
+            setAssignProposalModalOpen(false);
+            setDistributionRefresh((current) => current + 1);
+          }}
         />
       )}
       {isPrintOrderModalOpen && printRequest && (
         <PrintOrderModal
           printRequest={printRequest}
           setPrintOrderModalOpen={setPrintOrderModalOpen}
+          onConfirmed={() => {
+            setPrintOrderModalOpen(false);
+            setPrintRequestRefresh((current) => current + 1);
+          }}
         />
       )}
     </>

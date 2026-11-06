@@ -23,12 +23,14 @@ export const Panel = ({
 );
 
 export const ExceptionOrders = ({
+  refreshKey,
   onReassign,
 }: {
+  refreshKey: number;
   onReassign: (exception: ExceptionOrder) => void;
 }) => {
   const { data: exceptions, error, isLoading } = useApiData<ExceptionOrder[]>(
-    API_ENDPOINTS.orderDistribution.exceptions,
+    `${API_ENDPOINTS.orderDistribution.exceptions}?refresh=${refreshKey}`,
   );
   const exceptionCount =
     exceptions?.reduce((total, exception) => total + exception.quantity, 0) ?? 0;

@@ -13,8 +13,9 @@ export const API_ENDPOINTS = {
     options: "/address-parse/options",
     pending: "/address-parse/pending",
     parsed: "/address-parse/parsed",
+    parse: "/address-parse/parse",
+    approve: "/address-parse/approve",
   },
-  blacklistMonitor: "/blacklist/monitor",
   blacklistOrders: "/blacklist/orders",
   dashboardSummary: "/dashboard/summary",
   deliveryOrders: "/delivery-date/orders",
@@ -37,6 +38,7 @@ export const API_ENDPOINTS = {
     receiving: "/telesale/assignment/receiving",
   },
   forecastProducts: "/business-forecast/products",
+  forecastData: "/business-forecast/data",
   orderDistribution: {
     options: "/order-distribution/options",
     assigned: "/order-distribution/orders/assigned",
@@ -48,6 +50,11 @@ export const API_ENDPOINTS = {
     recommendation: "/order-distribution/recommendation",
     printRequest: "/order-distribution/print-request",
     employees: "/order-distribution/employees",
+    autoAssign: "/order-distribution/auto-assign",
+    reassignException: "/order-distribution/reassign-exception",
+    reportAbsence: "/order-distribution/report-absence",
+    confirmPrint: "/order-distribution/confirm-print",
+    approveRecommendation: "/order-distribution/approve-recommendation",
   },
 } as const;
 

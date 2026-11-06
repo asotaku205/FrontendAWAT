@@ -4,20 +4,19 @@ import { Button } from "../../components/ui/button";
 import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import usePagination from "../../hooks/usePagination";
-import {
-  customerActions,
-  customerKpis,
-  customerWatchList,
-  returnReasons,
-} from "../../mock/ForecastData";
+import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 
-const TabCustomer = () => {
+const TabCustomer = ({
+  data,
+}: {
+  data: BusinessForecastData["customer"];
+}) => {
   const navigate = useNavigate();
   const [customerStatuses, setCustomerStatuses] = useState<Record<string, string>>({});
 
-  const sendToTelesale = (customer: (typeof customerWatchList)[number]) => {
+  const sendToTelesale = (customer: (typeof data.watchList)[number]) => {
     const [customerName, phoneNumber = ""] = customer.name.split(" - ");
 
     navigate("/telesale/dashboard", {
@@ -35,7 +34,7 @@ const TabCustomer = () => {
     });
   };
 
-  const customerColumns: TableColumn<(typeof customerWatchList)[number]>[] = [
+  const customerColumns: TableColumn<(typeof data.watchList)[number]>[] = [
     { key: "name", title: "Khách hàng / SĐT" },
     { key: "group", title: "Nhóm" },
     { key: "orders", title: "Số đơn" },
@@ -76,13 +75,13 @@ const TabCustomer = () => {
   ];
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: customerWatchList,
+      data: data.watchList,
       pageSize: 4,
     });
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
-        {customerKpis.map((k) => (
+        {data.kpis.map((k) => (
           <KpiCard key={k.label} label={k.label} value={k.value} sub={k.sub} />
         ))}
       </div>
@@ -106,7 +105,7 @@ const TabCustomer = () => {
 
         <Panel title="Nhóm khách cần theo dõi">
           <div className="space-y-3">
-            {customerActions.map((c) => (
+            {data.actions.map((c) => (
               <div
                 key={c.text}
                 className="flex items-center justify-between gap-2 text-sm"
@@ -131,7 +130,7 @@ const TabCustomer = () => {
               page: currentPage,
               pageSize: 4,
               totalPages,
-              totalRecords: customerWatchList.length,
+              totalRecords: data.watchList.length,
               onPageChange: setCurrentPage,
             }}
           />
@@ -139,7 +138,7 @@ const TabCustomer = () => {
 
         <Panel title="Lý do hoàn phổ biến">
           <div className="space-y-3">
-            {returnReasons.map((r) => (
+            {data.returnReasons.map((r) => (
               <div key={r.reason}>
                 <div className="mb-1 flex justify-between text-xs">
                   <span className="text-gray-700">{r.reason}</span>

@@ -8,9 +8,15 @@ import TabStock from "./business-forecast/TabStock";
 import TabWarning from "./business-forecast/TabWarning";
 import TabActivity from "./business-forecast/TabActivity";
 import { Button } from "../components/ui/button";
+import useApiData from "../hooks/useApiData";
+import { API_ENDPOINTS } from "../services/api";
+import type { BusinessForecastData } from "../services/types";
 
 const BusinessForecast = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const { data, error, isLoading } = useApiData<BusinessForecastData>(
+    API_ENDPOINTS.forecastData,
+  );
   const tabs = [
     { id: "overview", label: "Tổng quan" },
     { id: "real", label: "Thực tế" },
@@ -33,17 +39,23 @@ const BusinessForecast = () => {
     if (nextTab) setActiveTab(nextTab);
   };
 
+  if (isLoading) return <p role="status">Đang tải dữ liệu dự báo kinh doanh...</p>;
+  if (error) {
+    return <p role="alert">Không tải được dữ liệu dự báo kinh doanh: {error}</p>;
+  }
+  if (!data) return <p role="alert">Không có dữ liệu dự báo kinh doanh.</p>;
+
   const activeContent = (() => {
     switch (activeTab) {
-      case "overview": return <TabOverview onTodoAction={handleOverviewAction} />;
-      case "real": return <TabReal />;
-      case "forecast": return <TabForecast />;
-      case "channel": return <TabChannel />;
-      case "stock": return <TabStock />;
-      case "customer": return <TabCustomer />;
-      case "warning": return <TabWarning onNavigateTab={setActiveTab} />;
-      case "activity": return <TabActivity />;
-      default: return <TabOverview onTodoAction={handleOverviewAction} />;
+      case "overview": return <TabOverview data={data.overview} onTodoAction={handleOverviewAction} />;
+      case "real": return <TabReal data={data.real} />;
+      case "forecast": return <TabForecast data={data.forecast} />;
+      case "channel": return <TabChannel data={data.channel} />;
+      case "stock": return <TabStock data={data.stock} />;
+      case "customer": return <TabCustomer data={data.customer} />;
+      case "warning": return <TabWarning data={data.warning} onNavigateTab={setActiveTab} />;
+      case "activity": return <TabActivity data={data.activity} />;
+      default: return <TabOverview data={data.overview} onTodoAction={handleOverviewAction} />;
     }
   })();
 

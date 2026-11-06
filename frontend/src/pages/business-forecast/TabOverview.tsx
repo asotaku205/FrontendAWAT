@@ -1,23 +1,18 @@
 import { Button } from "../../components/ui/button";
-import {
-  overviewChannelRevenue,
-  overviewFeaturedProducts,
-  overviewKpis,
-  overviewOrderResults,
-  overviewTodos,
-} from "../../mock/ForecastData";
+import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 
 type TabOverviewProps = {
+  data: BusinessForecastData["overview"];
   onTodoAction: (action: string) => void;
 };
 
-const TabOverview = ({ onTodoAction }: TabOverviewProps) => {
+const TabOverview = ({ data, onTodoAction }: TabOverviewProps) => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
-        {overviewKpis.map((k) => (
+        {data.kpis.map((k) => (
           <KpiCard key={k.label} label={k.label} value={k.value} sub={k.sub} />
         ))}
       </div>
@@ -31,7 +26,7 @@ const TabOverview = ({ onTodoAction }: TabOverviewProps) => {
         </Panel>
           <Panel title="Những việc cần làm" >
             <div className="space-y-3">
-              {overviewTodos.map((t) => (
+              {data.todos.map((t) => (
                 <div key={t.rank} className="flex items-center gap-2 text-sm">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
                     {t.rank}
@@ -57,7 +52,7 @@ const TabOverview = ({ onTodoAction }: TabOverviewProps) => {
         <Panel title="Doanh thu theo kênh" >
           
           <div className="space-y-3">
-            {overviewChannelRevenue.map((c) => (
+            {data.channelRevenue.map((c) => (
               <div key={c.name}>
                 <div className="mb-1 flex justify-between text-xs">
                   <span className="text-gray-700">{c.name}</span>
@@ -72,7 +67,7 @@ const TabOverview = ({ onTodoAction }: TabOverviewProps) => {
 
          <Panel title="Hiệu quả đơn hàng" >
           <div className="space-y-3">
-            {overviewOrderResults.map((o) => (
+            {data.orderResults.map((o) => (
               <div key={o.label}>
                 <div className="mb-1 flex justify-between text-xs">
                   <span className="text-gray-700">{o.label}</span>
@@ -86,7 +81,7 @@ const TabOverview = ({ onTodoAction }: TabOverviewProps) => {
         <Panel title="Sản phẩm nổi bật">
          
           <div className="space-y-2.5">
-            {overviewFeaturedProducts.map((p) => (
+            {data.featuredProducts.map((p) => (
               <div
                 key={p.code}
                 className="flex items-center justify-between text-sm"

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 import { statusBadgeClass } from "../mock/BlacklistData";
 import type { BlacklistOrder, BlacklistOrderStatus } from "../services/types";
@@ -7,9 +8,10 @@ import type { TableColumn } from "../components/ui/Table";
 import Panel from "./business-forecast/components/Panel";
 import Table from "../components/ui/Table";
 import { Button } from "../components/ui/button";
-import { API_ENDPOINTS } from "../services/api";
+import { API_ENDPOINTS, apiPatch } from "../services/api";
 import useApiData from "../hooks/useApiData";
 import Modal from "../components/ui/Modal";
+import type { BlacklistDecisionRequest } from "../services/types";
 
 const STATUS_FILTERS: ("all" | BlacklistOrderStatus)[] = [
   "all",
@@ -33,6 +35,8 @@ const BlacklistCheck = () => {
     Record<string, BlacklistOrderStatus>
   >({});
   const [pendingDecision, setPendingDecision] = useState<Decision | null>(null);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [isSavingDecision, setIsSavingDecision] = useState(false);
   const params = new URLSearchParams();
   if (statusFilter !== "all") {
     params.set("status", statusFilter);
@@ -183,24 +187,51 @@ const BlacklistCheck = () => {
   ];
 
   const askForDecision = (action: Decision["action"], orderCodes: string[]) => {
-    if (orderCodes.length > 0) setPendingDecision({ action, orderCodes });
+    if (orderCodes.length > 0) {
+      setDecisionError(null);
+      setPendingDecision({ action, orderCodes });
+    }
   };
 
-  const confirmDecision = () => {
-    if (!pendingDecision) return;
-    const nextStatus =
-      pendingDecision.action === "go" ? "Đã kiểm tra" : "Đã hủy";
-    setStatusUpdates((current) => {
-      const updates = { ...current };
-      pendingDecision.orderCodes.forEach((code) => {
-        updates[code] = nextStatus;
+  const confirmDecision = async () => {
+    if (!pendingDecision || isSavingDecision) return;
+    const request: BlacklistDecisionRequest = {
+      orderCodes: pendingDecision.orderCodes,
+      status: pendingDecision.action === "go" ? "Đã kiểm tra" : "Đã hủy",
+    };
+    setIsSavingDecision(true);
+    setDecisionError(null);
+    try {
+      const updatedOrders = await apiPatch<
+        BlacklistOrder[],
+        BlacklistDecisionRequest
+      >(API_ENDPOINTS.blacklistOrders, request);
+      setStatusUpdates((current) => {
+        const updates = { ...current };
+        updatedOrders.forEach((order) => {
+          updates[order.orderCode] = order.status;
+        });
+        return updates;
       });
-      return updates;
-    });
-    setSelectedIds([]);
-    setPendingDecision(null);
-    setDetailId(null);
-    setCurrentPage(1);
+      setSelectedIds([]);
+      setPendingDecision(null);
+      setDetailId(null);
+      setCurrentPage(1);
+    } catch (requestError: unknown) {
+      const responseMessage = axios.isAxiosError<{ message?: string }>(
+        requestError,
+      )
+        ? requestError.response?.data?.message
+        : undefined;
+      setDecisionError(
+        responseMessage ??
+          (requestError instanceof Error
+            ? requestError.message
+            : "Không thể cập nhật trạng thái đơn hàng."),
+      );
+    } finally {
+      setIsSavingDecision(false);
+    }
   };
 
   const countBy = (s: BlacklistOrderStatus) =>
@@ -380,24 +411,42 @@ const BlacklistCheck = () => {
             : "Xác nhận hủy đơn"
         }
         open={pendingDecision !== null}
-        onClose={() => setPendingDecision(null)}
+        onClose={() => {
+          if (!isSavingDecision) {
+            setPendingDecision(null);
+            setDecisionError(null);
+          }
+        }}
       >
         <p className="text-sm text-gray-700">
           {pendingDecision?.action === "go"
             ? `Bạn xác nhận cho ${pendingDecision.orderCodes.length} đơn được đi? Trạng thái sẽ chuyển thành “Đã kiểm tra”.`
             : `Bạn xác nhận hủy ${pendingDecision?.orderCodes.length} đơn đã chọn? Trạng thái sẽ chuyển thành “Đã hủy”.`}
         </p>
+        {decisionError && (
+          <p role="alert" className="mt-3 text-sm text-red-600">
+            Không thể cập nhật đơn hàng: {decisionError}
+          </p>
+        )}
         <div className="mt-5 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setPendingDecision(null)}>
+          <Button
+            variant="outline"
+            disabled={isSavingDecision}
+            onClick={() => {
+              setPendingDecision(null);
+              setDecisionError(null);
+            }}
+          >
             Quay lại
           </Button>
           <Button
             variant={
               pendingDecision?.action === "cancel" ? "destructive" : "default"
             }
+            disabled={isSavingDecision}
             onClick={confirmDecision}
           >
-            Xác nhận
+            {isSavingDecision ? "Đang cập nhật..." : "Xác nhận"}
           </Button>
         </div>
       </Modal>

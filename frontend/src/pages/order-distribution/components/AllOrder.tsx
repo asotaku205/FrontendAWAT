@@ -13,6 +13,7 @@ import type { OrderDistributionFilterOptions } from "../../../services/types";
 const AllOrder = () => {
   const [isAdvanceSearchOpen, setIsAdvanceSearchOpen] = useState(false);
   const [tabOpen, setTabOpen] = useState("assigned");
+  const [refreshKey, setRefreshKey] = useState(0);
   const { data: filterOptions, error, isLoading } =
     useApiData<OrderDistributionFilterOptions>(
       API_ENDPOINTS.orderDistribution.options,
@@ -75,7 +76,14 @@ const AllOrder = () => {
           <p role="alert" className="text-red-700">Không tải được tùy chọn bộ lọc: {error}</p>
         )}
       </Filter>
-      {tabOpen === "assigned" ? <Assigned /> : <Unassign />}
+      {tabOpen === "assigned" ? (
+        <Assigned refreshKey={refreshKey} />
+      ) : (
+        <Unassign
+          refreshKey={refreshKey}
+          onAssigned={() => setRefreshKey((current) => current + 1)}
+        />
+      )}
       
     </>
   );

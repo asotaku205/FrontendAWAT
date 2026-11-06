@@ -19,15 +19,16 @@ const pageSize = 5;
 const EmployeesTab = () => {
   const [isAdvanceSearchOpen, setIsAdvanceSearchOpen] = useState(false);
   const [isPrintOrderModalOpen, setPrintOrderModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { data: employees, error, isLoading } = useApiData<WarehouseEmployee[]>(
-    API_ENDPOINTS.orderDistribution.employees,
+    `${API_ENDPOINTS.orderDistribution.employees}?refresh=${refreshKey}`,
   );
   const { data: filterOptions, error: filterError, isLoading: filtersLoading } =
     useApiData<OrderDistributionFilterOptions>(
       API_ENDPOINTS.orderDistribution.options,
     );
-  const { data: printRequest, error: printError } = useApiData<PrintRequest>(
-    API_ENDPOINTS.orderDistribution.printRequest,
+  const { data: printRequest, error: printError } = useApiData<PrintRequest | null>(
+    `${API_ENDPOINTS.orderDistribution.printRequest}?refresh=${refreshKey}`,
   );
   const records = employees ?? [];
   const { currentData, totalPages, currentPage, setCurrentPage } = usePagination({
@@ -137,6 +138,10 @@ const EmployeesTab = () => {
         <PrintOrderModal
           printRequest={printRequest}
           setPrintOrderModalOpen={setPrintOrderModalOpen}
+          onConfirmed={() => {
+            setPrintOrderModalOpen(false);
+            setRefreshKey((current) => current + 1);
+          }}
         />
       )}
     </>

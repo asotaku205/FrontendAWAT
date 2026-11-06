@@ -11,7 +11,8 @@ import {
   MapPinHouse,
   PhoneCall,
   Truck,
-  Headphones
+  Headphones,
+  X,
 } from "lucide-react";
 import logo from "../assets/Denso_logo.svg";
 import { Button } from "../components/ui/button";
@@ -110,31 +111,39 @@ const MenuTreeItem = ({ item, depth = 0, onNavigate }: MenuTreeItemProps) => {
 
 type NavbarProps = {
   items?: MenuItem[];
-  logoSrc?: string;
-  brandName?: string;
-  isOpen: boolean;
+  logoSrc?: string;  isOpen: boolean;
   onNavigate: () => void;
+  onClose: () => void;
 };
 
 const Navbar = ({
   items = menuItems,
   logoSrc = logo,
-  brandName = "Denso",
   isOpen,
   onNavigate,
+  onClose,
 }: NavbarProps) => (
   <aside
     id="primary-navigation"
     className={`${isOpen ? "block md:flex" : "hidden"} fixed inset-x-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-gray-200 bg-white p-3 shadow-lg md:static md:min-h-screen md:max-h-none md:w-60 md:shrink-0 md:flex-col md:border-b-0 md:border-r md:shadow-none`}
   >
-    <NavLink
-      to="/"
-      onClick={onNavigate}
-      className="flex items-center gap-3 border-b border-gray-200 px-2 pb-5 pt-2"
-    >
-      <img src={logoSrc} alt="Denso" className="h-9 w-auto max-w-20 object-contain" />
-      <span className="text-sm font-bold text-gray-900">{brandName}</span>
-    </NavLink>
+    <div className="flex items-center justify-between gap-2 border-b border-gray-200 px-2 pb-4 pt-2">
+      <NavLink to="/" onClick={onNavigate} className="flex min-w-0 items-center gap-3">
+        <img src={logoSrc} alt="Denso" className="h-9 w-auto max-w-20 object-contain" />
+      </NavLink>
+      <Button
+        variant="ghost"
+        size="icon"
+        type="button"
+        aria-label="Đóng menu"
+        aria-expanded={isOpen}
+        aria-controls="primary-navigation"
+        onClick={onClose}
+        className="shrink-0"
+      >
+        <X aria-hidden="true" size={20} />
+      </Button>
+    </div>
     <nav aria-label="Danh mục chính" className="mt-5 flex-1">
       <ul className="flex flex-col gap-1">
         {items.map((item) => (

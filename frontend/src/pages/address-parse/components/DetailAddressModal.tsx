@@ -11,10 +11,16 @@ const DetailAddressModal = ({
   DetailData: address,
   setIsDetailModalOpen,
   addressOptions,
+  onConfirm,
+  isSubmitting,
+  error,
 }: {
   DetailData: AddressParseDataType;
   setIsDetailModalOpen: (isOpen: boolean) => void;
   addressOptions: AddressParseOptions;
+  onConfirm: () => void;
+  isSubmitting: boolean;
+  error: string | null;
 }) => {
   const confidence = [
     { title: "Tỉnh / TP", value: address.cityReliable },
@@ -67,10 +73,17 @@ const DetailAddressModal = ({
         </label>
       </div>
       <footer className="flex justify-end border-t border-gray-300 bg-gray-100">
+        {error && <p role="alert" className="mr-auto self-center px-4 text-sm text-red-600">{error}</p>}
         <Button variant="outline" className="my-4" onClick={close}>
           Hủy
         </Button>
-        <Button className="m-4">Xác nhận</Button>
+        <Button
+          className="m-4"
+          disabled={isSubmitting || address.status !== "Chưa xác nhận"}
+          onClick={onConfirm}
+        >
+          {isSubmitting ? "Đang xác nhận..." : "Xác nhận"}
+        </Button>
       </footer>
     </Modal>
   );

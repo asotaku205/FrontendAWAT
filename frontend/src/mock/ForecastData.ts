@@ -1,5 +1,6 @@
 
 import type {
+  BusinessForecastData,
   ForecastActivityLog,
   ForecastAlert,
   ForecastAlertDetail,
@@ -241,3 +242,63 @@ export const activityLog: ForecastActivityLog[] = [
   { time: "08:42", text: "Kiểm tra lỗi đồng bộ J&T" },
   { time: "08:20", text: "Phê duyệt thay đổi ngân sách TikTok" },
 ];
+
+export const businessForecastData: BusinessForecastData = {
+  overview: {
+    kpis: overviewKpis,
+    todos: overviewTodos,
+    channelRevenue: overviewChannelRevenue,
+    orderResults: overviewOrderResults,
+    featuredProducts: overviewFeaturedProducts,
+  },
+  real: {
+    kpis: realKpis,
+    businessSignals,
+    recentOrders: realRecentOrders,
+  },
+  forecast: {
+    kpis: forecastKpis,
+    scenarioData: forecastScenarioData,
+    productsToPrepare: forecastProductsToPrepare,
+    weeklyRisks,
+  },
+  channel: {
+    kpis: channelKpis,
+    channelsToOptimize,
+    efficiencyData: channelEfficiencyData,
+  },
+  stock: {
+    kpis: warehouseKpis,
+    urgentStock,
+    inventoryData: stockInventoryData,
+    incomingSummary: {
+      productCount: "4.600",
+      lotCount: "8 lô",
+    },
+  },
+  customer: {
+    kpis: customerKpis,
+    actions: customerActions,
+    watchList: customerWatchList,
+    returnReasons,
+  },
+  warning: {
+    kpis: warningKpis,
+    alertData: warningAlertData,
+    alertDetail: warningAlertDetail,
+  },
+  activity: {
+    kpis: activityKpis,
+    recentData: activityRecentData,
+    upcomingTasks: activityUpcomingTasks,
+    log: activityLog,
+    processingSummary: {
+      completedCount: 23,
+      pendingConfirmationCount: 7,
+      overdueCount: 2,
+      completionPercent: 72,
+      successfulTasks: 298,
+      runningTasks: 32,
+    },
+  },
+};

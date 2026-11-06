@@ -3,11 +3,7 @@ import { Button } from "../../components/ui/button";
 import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import usePagination from "../../hooks/usePagination";
-import {
-  businessSignals,
-  realKpis,
-  realRecentOrders,
-} from "../../mock/ForecastData";
+import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 const statusClass: Record<string, string> = {
@@ -16,7 +12,7 @@ const statusClass: Record<string, string> = {
   "Đang giao": "bg-blue-100 text-blue-700",
   "Đơn hoàn": "bg-red-100 text-red-700",
 };
-const realColumns: TableColumn<(typeof realRecentOrders)[number]>[] = [
+const realColumns: TableColumn<BusinessForecastData["real"]["recentOrders"][number]>[] = [
   { key: "id", title: "Mã đơn" },
   { key: "channel", title: "Kênh bán" },
   { key: "product", title: "Sản phẩm" },
@@ -44,22 +40,27 @@ const realColumns: TableColumn<(typeof realRecentOrders)[number]>[] = [
 
 
 
-const TabReal = () => {
+const TabReal = ({ data }: { data: BusinessForecastData["real"] }) => {
   const [showAllOrders, setShowAllOrders] = useState(false);
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: realRecentOrders,
+      data: data.recentOrders,
       pageSize: 4,
     });
 
   if (showAllOrders) {
-    return <AllOrdersPage onBack={() => setShowAllOrders(false)} />;
+    return (
+      <AllOrdersPage
+        orders={data.recentOrders}
+        onBack={() => setShowAllOrders(false)}
+      />
+    );
   }
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
-        {realKpis.map((k) => (
+        {data.kpis.map((k) => (
           <KpiCard key={k.label} label={k.label} value={k.value} sub={k.sub} />
         ))}
       </div>
@@ -86,7 +87,7 @@ const TabReal = () => {
 
         <Panel title="Tín hiệu kinh doanh">
           <div className="space-y-3">
-            {businessSignals.map((s) => (
+            {data.businessSignals.map((s) => (
               <div
                 key={s.text}
                 className="flex items-center justify-between gap-2 text-sm"
@@ -134,13 +135,19 @@ const TabReal = () => {
 export default TabReal;
 
 
-const AllOrdersPage = ({ onBack }: { onBack: () => void }) => {
+const AllOrdersPage = ({
+  orders,
+  onBack,
+}: {
+  orders: BusinessForecastData["real"]["recentOrders"];
+  onBack: () => void;
+}) => {
   const [channelFilter, setChannelFilter] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  const filteredOrders = realRecentOrders.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchesChannel = channelFilter === "all" || order.channel === channelFilter;
     const matchesRegion = regionFilter === "all" || order.region === regionFilter;
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
@@ -193,7 +200,7 @@ const AllOrdersPage = ({ onBack }: { onBack: () => void }) => {
           className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
         >
           <option value="all">Kênh: Tất cả</option>
-          {[...new Set(realRecentOrders.map((order) => order.channel))].map((channel) => (
+          {[...new Set(orders.map((order) => order.channel))].map((channel) => (
             <option key={channel} value={channel}>{channel}</option>
           ))}
         </select>
@@ -206,7 +213,7 @@ const AllOrdersPage = ({ onBack }: { onBack: () => void }) => {
           className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
         >
           <option value="all">Khu vực: Tất cả</option>
-          {[...new Set(realRecentOrders.map((order) => order.region))].map((region) => (
+          {[...new Set(orders.map((order) => order.region))].map((region) => (
             <option key={region} value={region}>{region}</option>
           ))}
         </select>
@@ -219,7 +226,7 @@ const AllOrdersPage = ({ onBack }: { onBack: () => void }) => {
           className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
         >
           <option value="all">Trạng thái: Tất cả</option>
-          {[...new Set(realRecentOrders.map((order) => order.status))].map((status) => (
+          {[...new Set(orders.map((order) => order.status))].map((status) => (
             <option key={status} value={status}>{status}</option>
           ))}
         </select>

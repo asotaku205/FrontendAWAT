@@ -5,9 +5,9 @@ import { API_ENDPOINTS } from "../../../services/api";
 import type { DistributionOrder } from "../../../services/types";
 import { orderColumns } from "./orderColumns";
 
-const Assigned = () => {
+const Assigned = ({ refreshKey }: { refreshKey: number }) => {
   const { data, error, isLoading } = useApiData<DistributionOrder[]>(
-    API_ENDPOINTS.orderDistribution.assigned,
+    `${API_ENDPOINTS.orderDistribution.assigned}?refresh=${refreshKey}`,
   );
   const orders = data ?? [];
   const { currentData, totalPages, currentPage, setCurrentPage } = usePagination({

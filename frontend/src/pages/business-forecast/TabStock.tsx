@@ -4,11 +4,15 @@ import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import Modal from "../../components/ui/Modal";
 import usePagination from "../../hooks/usePagination";
-import { stockInventoryData, urgentStock, warehouseKpis } from "../../mock/ForecastData";
+import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 
-const TabStock = () => {
+const TabStock = ({
+  data,
+}: {
+  data: BusinessForecastData["stock"];
+}) => {
   const [selectedStockCode, setSelectedStockCode] = useState<string | null>(null);
   const [urgentNote, setUrgentNote] = useState("");
   const [isProposalOpen, setIsProposalOpen] = useState(false);
@@ -19,12 +23,12 @@ const TabStock = () => {
   const [proposalNote, setProposalNote] = useState("");
   const [proposalCreated, setProposalCreated] = useState(false);
 
-  const selectedStock = stockInventoryData.find(
+  const selectedStock = data.inventoryData.find(
     (product) => product.code === selectedStockCode,
   );
 
   const openProposal = (productCode = "") => {
-    setProposalProductCode(productCode || stockInventoryData[0].code);
+    setProposalProductCode(productCode || data.inventoryData[0]?.code || "");
     setProposalQuantity("");
     setProposalNote("");
     setProposalCreated(false);
@@ -37,7 +41,7 @@ const TabStock = () => {
     setIsProposalOpen(false);
   };
 
-  const stockColumns: TableColumn<(typeof stockInventoryData)[number]>[] = [
+  const stockColumns: TableColumn<(typeof data.inventoryData)[number]>[] = [
     { key: "code", title: "Mã SP" },
     { key: "name", title: "Sản phẩm" },
     { key: "stock", title: "Tồn" },
@@ -64,13 +68,13 @@ const TabStock = () => {
   ];
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: stockInventoryData,
+      data: data.inventoryData,
       pageSize: 4,
     });
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
-        {warehouseKpis.map((k) => (
+        {data.kpis.map((k) => (
           <KpiCard key={k.label} label={k.label} value={k.value} sub={k.sub} />
         ))}
       </div>
@@ -86,7 +90,7 @@ const TabStock = () => {
         {/* Cần xử lý ngay */}
         <Panel title="Cần xử lý ngay">
           <div className="space-y-3">
-            {urgentStock.map((u) => (
+            {data.urgentStock.map((u) => (
               <div
                 key={u.code}
                 className="flex items-center justify-between gap-2 text-sm"
@@ -130,7 +134,7 @@ const TabStock = () => {
             page: currentPage,
             pageSize: 4,
             totalPages,
-            totalRecords: stockInventoryData.length,
+            totalRecords: data.inventoryData.length,
             onPageChange: setCurrentPage,
           }}
         />
@@ -198,10 +202,10 @@ const TabStock = () => {
               onChange={(event) => setProposalProductCode(event.target.value)}
               className="mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2"
             >
-              {!stockInventoryData.some((product) => product.code === proposalProductCode) && proposalProductCode && (
+              {!data.inventoryData.some((product) => product.code === proposalProductCode) && proposalProductCode && (
                 <option value={proposalProductCode}>{proposalProductCode}</option>
               )}
-              {stockInventoryData.map((product) => (
+              {data.inventoryData.map((product) => (
                 <option key={product.code} value={product.code}>{product.code} - {product.name}</option>
               ))}
             </select>
@@ -273,11 +277,11 @@ const TabStock = () => {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-gray-50 p-3">
               <div className="text-xs text-gray-500">Tổng sản phẩm đang về</div>
-              <div className="mt-1 text-lg font-bold text-gray-900">4.600</div>
+              <div className="mt-1 text-lg font-bold text-gray-900">{data.incomingSummary.productCount}</div>
             </div>
             <div className="rounded-lg bg-gray-50 p-3">
               <div className="text-xs text-gray-500">Số lô hàng</div>
-              <div className="mt-1 text-lg font-bold text-gray-900">8 lô</div>
+              <div className="mt-1 text-lg font-bold text-gray-900">{data.incomingSummary.lotCount}</div>
             </div>
           </div>
           <p className="text-sm text-gray-500">

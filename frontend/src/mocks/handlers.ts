@@ -16,6 +16,7 @@ import type {
   TelesaleOverviewResponse,
   TelesaleSummary,
   TelesaleWorkSummary,
+  PendingAddressDataType,
 } from "../services/types";
 import { AssignedOrderData } from "../mock/AssignedOrderData";
 import { AuditLogData } from "../mock/AuditLog";
@@ -43,14 +44,27 @@ import {
   workerProgress,
   warehouseEmployees,
 } from "../mock/OrderDistributionData";
-import type { AuthLoginRequest } from "../services/types";
+import type {
+  AuthLoginRequest,
+  ApproveDistributionRequest,
+  AddressParseOrdersRequest,
+  BlacklistDecisionRequest,
+  ConfirmPrintOrderRequest,
+  ReassignExceptionRequest,
+  ReportEmployeeAbsenceRequest,
+  AutoAssignOrdersResponse,
+} from "../services/types";
 import { BlacklistOrderData } from "../mock/BlacklistData";
+import { businessForecastData } from "../mock/ForecastData";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string");
+
+let hasPendingPrintRequest = true;
+let hasPendingAssignmentProposal = true;
 
 const addAssignedWorkOrder = (
   order: (typeof TelesalePriorityOrders)[number],
@@ -133,6 +147,131 @@ export const handlers = [
   ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.addressParse.parsed}`, () =>
     HttpResponse.json(AddressParseData),
+  ),
+  http.post(
+    `${API_BASE_URL}${API_ENDPOINTS.addressParse.parse}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (
+        !isRecord(body) ||
+        !isStringArray(body.orderCodes) ||
+        body.orderCodes.length === 0
+      ) {
+        return HttpResponse.json(
+          { message: "Danh sách đơn cần tách không hợp lệ." },
+          { status: 400 },
+        );
+      }
+
+      const { orderCodes }: AddressParseOrdersRequest = {
+        orderCodes: [...new Set(body.orderCodes)],
+      };
+      const pendingOrders = orderCodes.map((orderCode) =>
+        PendingAddressData.find((order) => order.orderCode === orderCode),
+      );
+      if (pendingOrders.some((order) => !order)) {
+        return HttpResponse.json(
+          { message: "Không tìm thấy một hoặc nhiều đơn chờ tách." },
+          { status: 404 },
+        );
+      }
+
+      const validPendingOrders = pendingOrders.filter(
+        (order): order is PendingAddressDataType => order !== undefined,
+      );
+      const parsedOrders = validPendingOrders.map((pendingOrder) => {
+        const existing = AddressParseData.find(
+          ({ orderCode }) => orderCode === pendingOrder.orderCode,
+        );
+        if (existing) {
+          return {
+            ...existing,
+            customerName: pendingOrder.customerName,
+            phoneNumber: pendingOrder.phoneNumber,
+            originalAddress: pendingOrder.originalAddress,
+            dateCreated: pendingOrder.dateCreated,
+            status: "Chưa xác nhận" as const,
+          };
+        }
+        return {
+          orderCode: pendingOrder.orderCode,
+          customerName: pendingOrder.customerName,
+          phoneNumber: pendingOrder.phoneNumber,
+          originalAddress: pendingOrder.originalAddress,
+          city: city[0],
+          cityReliable: 80,
+          district: district[0],
+          districtReliable: 80,
+          region: region[0],
+          regionReliable: 80,
+          detailedAddress: pendingOrder.originalAddress,
+          dateCreated: pendingOrder.dateCreated,
+          reliability: 80,
+          status: "Chưa xác nhận" as const,
+        };
+      });
+
+      parsedOrders.forEach((parsedOrder) => {
+        const existingIndex = AddressParseData.findIndex(
+          ({ orderCode }) => orderCode === parsedOrder.orderCode,
+        );
+        if (existingIndex === -1) {
+          AddressParseData.push(parsedOrder);
+        } else {
+          AddressParseData[existingIndex] = parsedOrder;
+        }
+      });
+      for (let index = PendingAddressData.length - 1; index >= 0; index -= 1) {
+        if (orderCodes.includes(PendingAddressData[index].orderCode)) {
+          PendingAddressData.splice(index, 1);
+        }
+      }
+      return HttpResponse.json(parsedOrders);
+    },
+  ),
+  http.patch(
+    `${API_BASE_URL}${API_ENDPOINTS.addressParse.approve}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (
+        !isRecord(body) ||
+        !isStringArray(body.orderCodes) ||
+        body.orderCodes.length === 0
+      ) {
+        return HttpResponse.json(
+          { message: "Danh sách địa chỉ cần xác nhận không hợp lệ." },
+          { status: 400 },
+        );
+      }
+
+      const orderCodes = [...new Set(body.orderCodes)];
+      const selectedOrders = orderCodes.map((orderCode) =>
+        AddressParseData.find((order) => order.orderCode === orderCode),
+      );
+      if (selectedOrders.some((order) => !order)) {
+        return HttpResponse.json(
+          { message: "Không tìm thấy một hoặc nhiều địa chỉ đã tách." },
+          { status: 404 },
+        );
+      }
+      if (
+        selectedOrders.some((order) => order?.status !== "Chưa xác nhận")
+      ) {
+        return HttpResponse.json(
+          { message: "Một hoặc nhiều địa chỉ đã được xác nhận trước đó." },
+          { status: 409 },
+        );
+      }
+
+      const validSelectedOrders = selectedOrders.filter(
+        (order): order is (typeof AddressParseData)[number] =>
+          order !== undefined,
+      );
+      validSelectedOrders.forEach((order) => {
+        order.status = "Đã xác nhận";
+      });
+      return HttpResponse.json(validSelectedOrders);
+    },
   ),
 
   http.get(`${API_BASE_URL}${API_ENDPOINTS.dashboardSummary}`, () =>
@@ -598,6 +737,9 @@ export const handlers = [
   http.get(`${API_BASE_URL}${API_ENDPOINTS.forecastProducts}`, () =>
     HttpResponse.json(ProductData),
   ),
+  http.get(`${API_BASE_URL}${API_ENDPOINTS.forecastData}`, () =>
+    HttpResponse.json(businessForecastData),
+  ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.orderDistribution.options}`, () =>
     HttpResponse.json(orderDistributionFilterOptions),
   ),
@@ -622,14 +764,229 @@ export const handlers = [
   ),
   http.get(
     `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.recommendation}`,
-    () => HttpResponse.json(distributionRecommendation),
+    () =>
+      HttpResponse.json(
+        hasPendingAssignmentProposal ? distributionRecommendation : null,
+      ),
   ),
   http.get(
     `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.printRequest}`,
-    () => HttpResponse.json(printRequest),
+    () => HttpResponse.json(hasPendingPrintRequest ? printRequest : null),
   ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.orderDistribution.employees}`, () =>
     HttpResponse.json(warehouseEmployees),
+  ),
+  http.post(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.autoAssign}`,
+    () => {
+      const availableEmployees = warehouseEmployees.filter(
+        ({ status }) => status === "Đang thực hiện",
+      );
+      if (availableEmployees.length === 0) {
+        return HttpResponse.json(
+          { message: "Không có nhân viên đang làm việc để phân công." },
+          { status: 409 },
+        );
+      }
+
+      const assignedOrders = UnassignOrderData.map((order, index) => {
+        const employee =
+          availableEmployees[index % availableEmployees.length];
+        const assignedOrder = {
+          ...order,
+          employees: employee.employees,
+          status: "Đang đóng gói" as const,
+          block: employee.currentBlock,
+        };
+        AssignedOrderData.push(assignedOrder);
+        employee.remainingOrder += 1;
+        return assignedOrder;
+      });
+      UnassignOrderData.splice(0, UnassignOrderData.length);
+
+      const result: AutoAssignOrdersResponse = { assignedOrders };
+      return HttpResponse.json(result);
+    },
+  ),
+  http.post(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.approveRecommendation}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (!isRecord(body) || typeof body.batch !== "string") {
+        return HttpResponse.json(
+          { message: "Đợt phân công không hợp lệ." },
+          { status: 400 },
+        );
+      }
+
+      const { batch }: ApproveDistributionRequest = { batch: body.batch };
+      if (
+        !hasPendingAssignmentProposal ||
+        batch !== distributionRecommendation.batch
+      ) {
+        return HttpResponse.json(
+          { message: "Đề xuất phân công không còn hiệu lực." },
+          { status: 409 },
+        );
+      }
+
+      const now = new Date();
+      const approveTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+        now.getMinutes(),
+      ).padStart(2, "0")}`;
+      const auditEntry = {
+        batch,
+        approveTime,
+        orderCount: distributionRecommendation.orderCount,
+        employeesCount: distributionRecommendation.employeesCount,
+        exceptionOrder: distributionRecommendation.manualOrderCount,
+        manager: "Quản lý mock",
+        note: "Đang thực hiện" as const,
+      };
+      AuditLogData.push(auditEntry);
+      hasPendingAssignmentProposal = false;
+      return HttpResponse.json(auditEntry);
+    },
+  ),
+  http.post(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.reassignException}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (!isRecord(body) || typeof body.code !== "string") {
+        return HttpResponse.json(
+          { message: "Mã đơn ngoại lệ không hợp lệ." },
+          { status: 400 },
+        );
+      }
+
+      const { code }: ReassignExceptionRequest = { code: body.code };
+      const exceptionIndex = exceptionOrders.findIndex(
+        (exception) => exception.code === code,
+      );
+      if (exceptionIndex === -1) {
+        return HttpResponse.json(
+          { message: "Không tìm thấy đơn ngoại lệ." },
+          { status: 404 },
+        );
+      }
+
+      const [exception] = exceptionOrders.splice(exceptionIndex, 1);
+      exception.assignments.forEach((assignment) => {
+        const worker = workerProgress.find(
+          ({ id }) => id === assignment.employeeId,
+        );
+        if (worker) {
+          worker.block = (worker.block ?? 0) + assignment.orderCount;
+          worker.note = "Đã nhận thêm đơn phân công lại.";
+        }
+        const employee = warehouseEmployees.find(
+          ({ employees }) => employees === assignment.employeeName,
+        );
+        if (employee) {
+          employee.currentBlock += assignment.orderCount;
+          employee.remainingOrder += assignment.orderCount;
+        }
+      });
+
+      return HttpResponse.json({
+        code,
+        reassignedOrders: exception.ordersToReassign,
+      });
+    },
+  ),
+  http.post(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.reportAbsence}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (
+        !isRecord(body) ||
+        typeof body.employeeName !== "string" ||
+        typeof body.reason !== "string" ||
+        !body.reason.trim()
+      ) {
+        return HttpResponse.json(
+          { message: "Nhân viên và lý do nghỉ là bắt buộc." },
+          { status: 400 },
+        );
+      }
+
+      const { employeeName, reason }: ReportEmployeeAbsenceRequest = {
+        employeeName: body.employeeName,
+        reason: body.reason.trim(),
+      };
+      const worker = workerProgress.find(
+        (item) => item.name === employeeName && item.canReportAbsence,
+      );
+      if (!worker) {
+        return HttpResponse.json(
+          { message: "Không tìm thấy nhân viên đang làm việc." },
+          { status: 404 },
+        );
+      }
+      worker.canReportAbsence = false;
+      worker.note = `Nghỉ đột xuất: ${reason}`;
+
+      const employee = warehouseEmployees.find(
+        (item) => item.employees === employeeName,
+      );
+      if (employee) employee.status = "Nghỉ đột xuất";
+
+      return HttpResponse.json(worker);
+    },
+  ),
+  http.post(
+    `${API_BASE_URL}${API_ENDPOINTS.orderDistribution.confirmPrint}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (
+        !isRecord(body) ||
+        typeof body.employeeId !== "string" ||
+        typeof body.employeeName !== "string" ||
+        typeof body.nextBlockCount !== "number" ||
+        !Number.isInteger(body.nextBlockCount) ||
+        body.nextBlockCount <= 0
+      ) {
+        return HttpResponse.json(
+          { message: "Thông tin xác nhận in block không hợp lệ." },
+          { status: 400 },
+        );
+      }
+      if (
+        !hasPendingPrintRequest ||
+        body.employeeId !== printRequest.employeeId ||
+        body.employeeName !== printRequest.employeeName ||
+        body.nextBlockCount !== printRequest.nextBlockCount
+      ) {
+        return HttpResponse.json(
+          { message: "Yêu cầu in không còn hiệu lực." },
+          { status: 409 },
+        );
+      }
+
+      const requestData: ConfirmPrintOrderRequest = {
+        employeeId: body.employeeId,
+        employeeName: body.employeeName,
+        nextBlockCount: body.nextBlockCount,
+      };
+      const worker = workerProgress.find(
+        (item) => item.id === requestData.employeeId,
+      );
+      if (worker) {
+        worker.block = (worker.block ?? 0) + requestData.nextBlockCount;
+        worker.action = undefined;
+        worker.note = "Đã in thêm block tiếp theo.";
+      }
+      const employee = warehouseEmployees.find(
+        (item) => item.employees === requestData.employeeName,
+      );
+      if (employee) {
+        employee.currentBlock += requestData.nextBlockCount;
+        employee.remainingOrder += requestData.nextBlockCount;
+        employee.status = "Đang thực hiện";
+      }
+      hasPendingPrintRequest = false;
+      return HttpResponse.json(requestData);
+    },
   ),
   http.get(`${API_BASE_URL}${API_ENDPOINTS.blacklistOrders}`, ({ request }) => {
     const url = new URL(request.url);
@@ -644,4 +1001,58 @@ export const handlers = [
     });
     return HttpResponse.json(filteredOrders);
   }),
+  http.patch(
+    `${API_BASE_URL}${API_ENDPOINTS.blacklistOrders}`,
+    async ({ request }) => {
+      const body: unknown = await request.json();
+      if (
+        !isRecord(body) ||
+        !isStringArray(body.orderCodes) ||
+        body.orderCodes.length === 0 ||
+        (body.status !== "Đã kiểm tra" && body.status !== "Đã hủy")
+      ) {
+        return HttpResponse.json(
+          { message: "Danh sách đơn và trạng thái quyết định không hợp lệ." },
+          { status: 400 },
+        );
+      }
+
+      const decision: BlacklistDecisionRequest = {
+        orderCodes: body.orderCodes,
+        status: body.status,
+      };
+      const orderCodes = [...new Set(decision.orderCodes)];
+      const selectedOrders = orderCodes.map((orderCode) =>
+        BlacklistOrderData.find((order) => order.orderCode === orderCode),
+      );
+      if (selectedOrders.some((order) => !order)) {
+        return HttpResponse.json(
+          { message: "Không tìm thấy một hoặc nhiều đơn hàng." },
+          { status: 404 },
+        );
+      }
+      if (
+        selectedOrders.some(
+          (order) =>
+            order?.status !== "Blacklist" &&
+            order?.status !== "Hoàn nhiều lần",
+        )
+      ) {
+        return HttpResponse.json(
+          { message: "Một hoặc nhiều đơn đã được xử lý trước đó." },
+          { status: 409 },
+        );
+      }
+
+      const updatedOrders = BlacklistOrderData.filter((order) =>
+        orderCodes.includes(order.orderCode),
+      ).map((order) => {
+        order.status = decision.status;
+        order.isBlacklisted = false;
+        return order;
+      });
+
+      return HttpResponse.json(updatedOrders);
+    },
+  ),
 ];

@@ -5,16 +5,18 @@ import type { WorkerProgress } from "../../../services/types";
 import { Panel } from "./ProcessTabPanels";
 
 const WorkerProgressPanel = ({
+  refreshKey,
   onReportAbsence,
   onPrintOrder,
   onViewAll,
 }: {
+  refreshKey: number;
   onReportAbsence: (employeeName: string) => void;
   onPrintOrder: () => void;
   onViewAll: () => void;
 }) => {
   const { data: workers, error, isLoading } = useApiData<WorkerProgress[]>(
-    API_ENDPOINTS.orderDistribution.workers,
+    `${API_ENDPOINTS.orderDistribution.workers}?refresh=${refreshKey}`,
   );
 
   return (

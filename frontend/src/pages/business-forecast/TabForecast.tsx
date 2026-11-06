@@ -4,21 +4,20 @@ import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import Modal from "../../components/ui/Modal";
 import usePagination from "../../hooks/usePagination";
-import {
-  forecastKpis,
-  forecastScenarioData,
-  forecastProductsToPrepare,
-  weeklyRisks,
-} from "../../mock/ForecastData";
+import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 
 type Decision = "Đã duyệt" | "Đã từ chối";
 type DecisionInfo = { decision: Decision; note: string };
 
-const TabForecast = () => {
+const TabForecast = ({
+  data,
+}: {
+  data: BusinessForecastData["forecast"];
+}) => {
   const [selectedProduct, setSelectedProduct] = useState<
-    (typeof forecastProductsToPrepare)[number] | null
+    (typeof data.productsToPrepare)[number] | null
   >(null);
   const [isRisksModalOpen, setIsRisksModalOpen] = useState(false);
   const [riskNotes, setRiskNotes] = useState<Record<string, string>>({});
@@ -53,7 +52,7 @@ const TabForecast = () => {
   };
 
   const forecastColumns: TableColumn<
-    (typeof forecastProductsToPrepare)[number]
+    (typeof data.productsToPrepare)[number]
   >[] = [
     { key: "code", title: "Mã SP" },
     { key: "name", title: "Sản phẩm" },
@@ -77,13 +76,13 @@ const TabForecast = () => {
   ];
   const { currentData, totalPages, currentPage, setCurrentPage } =
     usePagination({
-      data: forecastProductsToPrepare,
+      data: data.productsToPrepare,
       pageSize: 4,
     });
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
-        {forecastKpis.map((k) => (
+        {data.kpis.map((k) => (
           <KpiCard key={k.label} label={k.label} value={k.value} sub={k.sub} />
         ))}
       </div>
@@ -108,7 +107,7 @@ const TabForecast = () => {
         {/* Kịch bản dự báo */}
         <Panel title="Kịch bản dự báo">
           <div className="space-y-3">
-            {forecastScenarioData.map((s) => (
+            {data.scenarioData.map((s) => (
               <div
                 key={s.name}
                 className="rounded-lg border border-gray-200 p-3"
@@ -148,7 +147,7 @@ const TabForecast = () => {
         {/* Rủi ro tuần tới */}
         <Panel title="Rủi ro tuần tới">
           <div className="space-y-2.5">
-            {weeklyRisks.map((r) => (
+            {data.weeklyRisks.map((r) => (
               <div key={r} className="flex items-start gap-2 text-sm p-3">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-yellow-100 text-xs font-bold text-yellow-700">
                   !
@@ -269,7 +268,7 @@ const TabForecast = () => {
         contentClassName="min-h-0 overflow-y-auto p-5"
       >
         <div className="space-y-3">
-          {weeklyRisks.map((risk) => (
+          {data.weeklyRisks.map((risk) => (
             <div
               key={risk}
               className="flex items-start gap-2 rounded-lg border border-gray-200 p-3 text-sm"

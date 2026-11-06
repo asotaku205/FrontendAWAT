@@ -5,21 +5,18 @@ import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import Modal from "../../components/ui/Modal";
 import usePagination from "../../hooks/usePagination";
-import {
-  warningAlertData,
-  warningAlertDetail,
-  warningKpis,
-} from "../../mock/ForecastData";
+import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
 
 type TabWarningProps = {
+  data: BusinessForecastData["warning"];
   onNavigateTab: (tab: string) => void;
 };
 
-const TabWarning = ({ onNavigateTab }: TabWarningProps) => {
+const TabWarning = ({ data, onNavigateTab }: TabWarningProps) => {
   const navigate = useNavigate();
-  const [selectedIssue, setSelectedIssue] = useState(warningAlertData[0]?.issue ?? "");
+  const [selectedIssue, setSelectedIssue] = useState(data.alertData[0]?.issue ?? "");
   const [levelFilter, setLevelFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
@@ -30,7 +27,7 @@ const TabWarning = ({ onNavigateTab }: TabWarningProps) => {
   const [isConfirmDoneOpen, setIsConfirmDoneOpen] = useState(false);
   const [newOwner, setNewOwner] = useState("");
 
-  const alerts = warningAlertData.map((alert) => ({
+  const alerts = data.alertData.map((alert) => ({
     ...alert,
     owner: ownerUpdates[alert.issue] ?? alert.owner,
     status: statusUpdates[alert.issue] ?? "Mới",
@@ -119,7 +116,7 @@ const TabWarning = ({ onNavigateTab }: TabWarningProps) => {
 
   const getSuggestion = () => {
     if (!selectedAlert) return "";
-    if (selectedAlert.group === "Tồn kho") return warningAlertDetail.suggestion;
+    if (selectedAlert.group === "Tồn kho") return data.alertDetail.suggestion;
     if (selectedAlert.group === "Nguồn cung") return "Mở tab Tồn kho để theo dõi nguồn cung và hàng đang về.";
     if (selectedAlert.group === "Marketing") return "Mở tab Kênh bán để xem hiệu quả và đề xuất tối ưu.";
     if (selectedAlert.group === "Khách hàng") return "Mở tab Khách hàng để cập nhật trạng thái; khách rủi ro có thể được đẩy sang Telesale ưu tiên.";
@@ -130,7 +127,7 @@ const TabWarning = ({ onNavigateTab }: TabWarningProps) => {
     <div className="space-y-4">
       <div>
         <div className="grid grid-cols-5 gap-3">
-          {warningKpis.map((kpi) => (
+          {data.kpis.map((kpi) => (
             <KpiCard key={kpi.label} label={kpi.label} value={kpi.value} sub={kpi.sub} />
           ))}
         </div>

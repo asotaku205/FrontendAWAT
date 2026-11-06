@@ -39,6 +39,10 @@ export type PendingAddressDataType = {
   status: "Chờ phân tách";
 };
 
+export type AddressParseOrdersRequest = {
+  orderCodes: string[];
+};
+
 export type AddressParseOptions = {
   city: string[];
   district: string[];
@@ -118,6 +122,25 @@ export type PrintRequest = {
   employeeName: string;
   employeeId: string;
   nextBlockCount: number;
+};
+
+export type ReassignExceptionRequest = {
+  code: string;
+};
+
+export type ReportEmployeeAbsenceRequest = {
+  employeeName: string;
+  reason: string;
+};
+
+export type ConfirmPrintOrderRequest = PrintRequest;
+
+export type ApproveDistributionRequest = {
+  batch: string;
+};
+
+export type AutoAssignOrdersResponse = {
+  assignedOrders: DistributionOrder[];
 };
 
 export type WarehouseEmployee = {
@@ -310,15 +333,6 @@ export type ForecastProduct = {
   status: "Đã xác nhận" | "Chưa xác nhận";
 };
 
-export type MonitorCustomer = {
-  customerName: string;
-  phoneNumber: number;
-  address: string;
-  recentActivity: string;
-  refundCount: number;
-  totalAmount: number;
-};
-
 export type BlacklistOrderStatus =
   | "Đã kiểm tra"
   | "Hoàn nhiều lần"
@@ -341,6 +355,11 @@ export type BlacklistOrder = {
   status: BlacklistOrderStatus;
   isBlacklisted: boolean;
   orderCountLast3Months: number;
+};
+
+export type BlacklistDecisionRequest = {
+  orderCodes: string[];
+  status: Extract<BlacklistOrderStatus, "Đã kiểm tra" | "Đã hủy">;
 };
 
 export type ForecastKpi = {
@@ -450,3 +469,63 @@ export type ForecastRecentActivity = {
 };
 export type ForecastUpcomingTask = { text: string; level: string; time: string };
 export type ForecastActivityLog = { time: string; text: string };
+
+export type BusinessForecastData = {
+  overview: {
+    kpis: ForecastKpi[];
+    todos: ForecastTodoItem[];
+    channelRevenue: ForecastChannelRevenue[];
+    orderResults: ForecastOrderResult[];
+    featuredProducts: ForecastFeaturedProduct[];
+  };
+  real: {
+    kpis: ForecastKpi[];
+    businessSignals: ForecastBusinessSignal[];
+    recentOrders: ForecastRecentOrder[];
+  };
+  forecast: {
+    kpis: ForecastKpi[];
+    scenarioData: ForecastScenario[];
+    productsToPrepare: ForecastProductToPrepare[];
+    weeklyRisks: string[];
+  };
+  channel: {
+    kpis: ForecastKpi[];
+    channelsToOptimize: ForecastChannelOptimization[];
+    efficiencyData: ForecastChannelEfficiency[];
+  };
+  stock: {
+    kpis: ForecastKpi[];
+    urgentStock: ForecastUrgentStock[];
+    inventoryData: ForecastStockItem[];
+    incomingSummary: {
+      productCount: string;
+      lotCount: string;
+    };
+  };
+  customer: {
+    kpis: ForecastKpi[];
+    actions: ForecastCustomerAction[];
+    watchList: ForecastCustomerToWatch[];
+    returnReasons: ForecastReturnReason[];
+  };
+  warning: {
+    kpis: ForecastKpi[];
+    alertData: ForecastAlert[];
+    alertDetail: ForecastAlertDetail;
+  };
+  activity: {
+    kpis: ForecastKpi[];
+    recentData: ForecastRecentActivity[];
+    upcomingTasks: ForecastUpcomingTask[];
+    log: ForecastActivityLog[];
+    processingSummary: {
+      completedCount: number;
+      pendingConfirmationCount: number;
+      overdueCount: number;
+      completionPercent: number;
+      successfulTasks: number;
+      runningTasks: number;
+    };
+  };
+};

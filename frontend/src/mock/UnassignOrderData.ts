@@ -8,22 +8,14 @@ type UnassignOrderTyppe = {
 };
 export const UnassignOrderData: UnassignOrderTyppe[] = [
   {
-    orderCode: "DH0108",
+    orderCode: "DH0117",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",
     status: "Chưa chia",
   },
    {
-    orderCode: "DH0109",
-    sku: "DN-DO1809 × 1",
-    location: "A1-01",
-    employees: "",
-    status: "Chưa chia",
-   
-  },
-   {
-    orderCode: "DH0110",
+    orderCode: "DH0118",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",
@@ -31,7 +23,15 @@ export const UnassignOrderData: UnassignOrderTyppe[] = [
    
   },
    {
-    orderCode: "DH0111",
+    orderCode: "DH0119",
+    sku: "DN-DO1809 × 1",
+    location: "A1-01",
+    employees: "",
+    status: "Chưa chia",
+   
+  },
+   {
+    orderCode: "DH0120",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",
@@ -40,7 +40,7 @@ export const UnassignOrderData: UnassignOrderTyppe[] = [
   },
 
    {
-    orderCode: "DH0112",
+    orderCode: "DH0121",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",
@@ -48,7 +48,7 @@ export const UnassignOrderData: UnassignOrderTyppe[] = [
    
   },
    {
-    orderCode: "DH0113",
+    orderCode: "DH0122",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",
@@ -56,7 +56,7 @@ export const UnassignOrderData: UnassignOrderTyppe[] = [
  
   },
    {
-    orderCode: "DH0114",
+    orderCode: "DH0123",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",
@@ -64,7 +64,7 @@ export const UnassignOrderData: UnassignOrderTyppe[] = [
  
   },
    {
-    orderCode: "DH0115",
+    orderCode: "DH0124",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",
@@ -72,7 +72,7 @@ export const UnassignOrderData: UnassignOrderTyppe[] = [
   
   },
    {
-    orderCode: "DH0116",
+    orderCode: "DH0125",
     sku: "DN-DO1809 × 1",
     location: "A1-01",
     employees: "",

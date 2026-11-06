@@ -4,14 +4,10 @@ import type { TableColumn } from "../../components/ui/Table";
 import Table from "../../components/ui/Table";
 import Modal from "../../components/ui/Modal";
 import usePagination from "../../hooks/usePagination";
-import {
-  channelEfficiencyData,
-  channelKpis,
-  channelsToOptimize,
-} from "../../mock/ForecastData";
+import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
-const channelColumns: TableColumn<(typeof channelEfficiencyData)[number]>[] = [
+const channelColumns: TableColumn<BusinessForecastData["channel"]["efficiencyData"][number]>[] = [
   { key: "channel", title: "Kênh" },
   { key: "cost", title: "Chi phí" },
   { key: "revenue", title: "Doanh thu" },
@@ -29,11 +25,15 @@ const channelColumns: TableColumn<(typeof channelEfficiencyData)[number]>[] = [
   },
   { key: "suggestion", title: "Đề xuất" },
 ];
-const TabChannel = () => {
+const TabChannel = ({
+  data,
+}: {
+  data: BusinessForecastData["channel"];
+}) => {
   type Decision = "Đã duyệt" | "Đã từ chối";
 
   const [selectedChannel, setSelectedChannel] = useState<
-    (typeof channelsToOptimize)[number] | null
+    (typeof data.channelsToOptimize)[number] | null
   >(null);
   const [note, setNote] = useState("");
   const [savedDecisions, setSavedDecisions] = useState<Record<string, { decision: Decision; note: string }>>({});
@@ -53,13 +53,13 @@ const TabChannel = () => {
 
    const { currentData, totalPages, currentPage, setCurrentPage } =
       usePagination({
-        data: channelEfficiencyData,
+        data: data.efficiencyData,
         pageSize: 4,
       });
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-5 gap-3">
-        {channelKpis.map((k) => (
+        {data.kpis.map((k) => (
           <KpiCard key={k.label} label={k.label} value={k.value} sub={k.sub} />
         ))}
       </div>
@@ -83,7 +83,7 @@ const TabChannel = () => {
 
         <Panel title="Kênh cần tối ưu">
           <div className="space-y-3">
-            {channelsToOptimize.map((c) => (
+            {data.channelsToOptimize.map((c) => (
               <div
                 key={c.name}
                 className="flex items-center justify-between gap-2 text-sm"
