@@ -1,9 +1,9 @@
-import { Button } from "../../components/Button";
+import { Button } from "../../../components/Button";
 import {
   statusBadgeClass,
   needsDecision,
-} from "../../mocks/blacklist-data";
-import type { BlacklistOrder } from "../../services/types";
+} from "../../../mocks/blacklist-data";
+import type { BlacklistOrder } from "../../../services/types";
 
 type Props = {
   order: BlacklistOrder | null;

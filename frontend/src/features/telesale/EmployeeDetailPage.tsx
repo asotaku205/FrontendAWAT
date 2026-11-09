@@ -176,7 +176,7 @@ const EmployeeSummaryPanel = ({
   );
 };
 
-const ViewEmployeePage = () => {
+const EmployeeDetailPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const employeeName = searchParams.get("employeeName") ?? "";
@@ -450,4 +450,4 @@ const ViewEmployeePage = () => {
   );
 };
 
-export default ViewEmployeePage;
+export default EmployeeDetailPage;

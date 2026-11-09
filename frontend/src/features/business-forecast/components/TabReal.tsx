@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Button } from "../../components/Button";
-import type { TableColumn } from "../../components/Table";
-import Table from "../../components/Table";
-import usePagination from "../../hooks/use-pagination";
-import type { BusinessForecastData } from "../../services/types";
-import KpiCard from "./components/KpiCard";
-import Panel from "./components/Panel";
-import { HourlyRevenueChart } from "./components/ForecastCharts";
+import { Button } from "../../../components/Button";
+import type { TableColumn } from "../../../components/Table";
+import Table from "../../../components/Table";
+import usePagination from "../../../hooks/use-pagination";
+import type { BusinessForecastData } from "../../../services/types";
+import KpiCard from "./KpiCard";
+import Panel from "./Panel";
+import { HourlyRevenueChart } from "./ForecastCharts";
 const statusClass: Record<string, string> = {
   "Thành công": "bg-green-100 text-green-700",
   "Đang xử lý": "bg-yellow-100 text-yellow-700",

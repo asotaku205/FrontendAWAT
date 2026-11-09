@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { Button } from "../components/Button";
-import Table, { type TableColumn } from "../components/Table";
-import useApiData from "../hooks/use-api-data";
-import usePagination from "../hooks/use-pagination";
-import { API_ENDPOINTS } from "../services/api";
+import { Button } from "../../components/Button";
+import Table, { type TableColumn } from "../../components/Table";
+import useApiData from "../../hooks/use-api-data";
+import usePagination from "../../hooks/use-pagination";
+import { API_ENDPOINTS } from "../../services/api";
 import type {
   AuditLogRecord,
   DistributionRecommendation,
   PrintRequest,
-} from "../services/types";
-import AllOrder from "../features/order-distribution/components/AllOrder";
-import AssignProposalModal from "../features/order-distribution/components/AssignProposalModal";
-import EmployeesTab from "../features/order-distribution/components/EmployeesTab";
-import PrintOrderModal from "../features/order-distribution/components/PrintOrderModal";
-import ProcessTab from "../features/order-distribution/components/ProcessTab";
+} from "../../services/types";
+import AllOrder from "./components/AllOrder";
+import AssignProposalModal from "./components/AssignProposalModal";
+import EmployeesTab from "./components/EmployeesTab";
+import PrintOrderModal from "./components/PrintOrderModal";
+import ProcessTab from "./components/ProcessTab";
 
 type OrderDistributionTab = "all" | "process" | "employees";
 

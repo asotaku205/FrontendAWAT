@@ -1,17 +1,17 @@
 import axios from "axios";
 import { useState } from "react";
-import { statusBadgeClass } from "../mocks/blacklist-data";
-import type { BlacklistOrder, BlacklistOrderStatus } from "../services/types";
-import usePagination from "../hooks/use-pagination";
-import OrderDetailModal from "../features/blacklist/OrderDetailModal";
-import type { TableColumn } from "../components/Table";
-import Panel from "../features/business-forecast/components/Panel";
-import Table from "../components/Table";
-import { Button } from "../components/Button";
-import { API_ENDPOINTS, apiPatch } from "../services/api";
-import useApiData from "../hooks/use-api-data";
-import Modal from "../components/Modal";
-import type { BlacklistDecisionRequest } from "../services/types";
+import { statusBadgeClass } from "../../mocks/blacklist-data";
+import type { BlacklistOrder, BlacklistOrderStatus } from "../../services/types";
+import usePagination from "../../hooks/use-pagination";
+import OrderDetailModal from "./components/OrderDetailModal";
+import type { TableColumn } from "../../components/Table";
+import Panel from "../business-forecast/components/Panel";
+import Table from "../../components/Table";
+import { Button } from "../../components/Button";
+import { API_ENDPOINTS, apiPatch } from "../../services/api";
+import useApiData from "../../hooks/use-api-data";
+import Modal from "../../components/Modal";
+import type { BlacklistDecisionRequest } from "../../services/types";
 
 const STATUS_FILTERS: ("all" | BlacklistOrderStatus)[] = [
   "all",

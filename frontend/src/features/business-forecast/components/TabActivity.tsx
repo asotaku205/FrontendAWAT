@@ -1,9 +1,9 @@
-import type { TableColumn } from "../../components/Table";
-import Table from "../../components/Table";
-import usePagination from "../../hooks/use-pagination";
-import type { BusinessForecastData } from "../../services/types";
-import KpiCard from "./components/KpiCard";
-import Panel from "./components/Panel";
+import type { TableColumn } from "../../../components/Table";
+import Table from "../../../components/Table";
+import usePagination from "../../../hooks/use-pagination";
+import type { BusinessForecastData } from "../../../services/types";
+import KpiCard from "./KpiCard";
+import Panel from "./Panel";
 const activityColumns: TableColumn<BusinessForecastData["activity"]["recentData"][number]>[] = [
   { key: "time", title: "Thời gian" },
   { key: "activity", title: "Hoạt động" },

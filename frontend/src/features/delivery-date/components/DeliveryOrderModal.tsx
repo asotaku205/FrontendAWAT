@@ -10,7 +10,7 @@ type DeliveryOrderModalProps = {
   onClose: () => void;
 };
 
-const DeliveryOderModal = ({
+const DeliveryOrderModal = ({
   order,
   callStatusOptions,
   onClose,
@@ -79,4 +79,4 @@ const DeliveryOderModal = ({
   </Modal>
 );
 
-export default DeliveryOderModal;
+export default DeliveryOrderModal;

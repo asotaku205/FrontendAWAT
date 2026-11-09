@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Button } from "../../components/Button";
-import type { TableColumn } from "../../components/Table";
-import Table from "../../components/Table";
-import Modal from "../../components/Modal";
-import usePagination from "../../hooks/use-pagination";
-import type { BusinessForecastData } from "../../services/types";
-import KpiCard from "./components/KpiCard";
-import Panel from "./components/Panel";
-import { StockCoverageChart } from "./components/ForecastCharts";
+import { Button } from "../../../components/Button";
+import type { TableColumn } from "../../../components/Table";
+import Table from "../../../components/Table";
+import Modal from "../../../components/Modal";
+import usePagination from "../../../hooks/use-pagination";
+import type { BusinessForecastData } from "../../../services/types";
+import KpiCard from "./KpiCard";
+import Panel from "./Panel";
+import { StockCoverageChart } from "./ForecastCharts";
 
 const TabStock = ({
   data,

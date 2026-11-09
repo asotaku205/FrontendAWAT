@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import { Button } from "../components/Button";
-import Filter from "../components/Filter";
-import SearchInput from "../components/SearchInput";
-import SelectOption from "../components/SelectOption";
-import Table, { type TableColumn } from "../components/Table";
-import useApiData from "../hooks/use-api-data";
-import usePagination from "../hooks/use-pagination";
-import { API_ENDPOINTS } from "../services/api";
-import type { DeliveryOrder } from "../services/types";
-import DeliveryOderModal from "../features/delivery-date/components/DeliveryOderModal";
+import { Button } from "../../components/Button";
+import Filter from "../../components/Filter";
+import SearchInput from "../../components/SearchInput";
+import SelectOption from "../../components/SelectOption";
+import Table, { type TableColumn } from "../../components/Table";
+import useApiData from "../../hooks/use-api-data";
+import usePagination from "../../hooks/use-pagination";
+import { API_ENDPOINTS } from "../../services/api";
+import type { DeliveryOrder } from "../../services/types";
+import DeliveryOrderModal from "./components/DeliveryOrderModal";
 
 const pageSize = 5;
 const emptyOrders: DeliveryOrder[] = [];
@@ -322,7 +322,7 @@ const DeliveryDate = () => {
       />
 
       {selectedOrder && (
-        <DeliveryOderModal
+        <DeliveryOrderModal
           order={selectedOrder}
           callStatusOptions={callStatuses}
           onClose={() => setSelectedOrder(null)}

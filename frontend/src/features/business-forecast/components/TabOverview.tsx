@@ -1,12 +1,12 @@
-import { Button } from "../../components/Button";
-import type { BusinessForecastData } from "../../services/types";
-import KpiCard from "./components/KpiCard";
-import Panel from "./components/Panel";
+import { Button } from "../../../components/Button";
+import type { BusinessForecastData } from "../../../services/types";
+import KpiCard from "./KpiCard";
+import Panel from "./Panel";
 import {
   ChannelRevenueChart,
   OrderResultsChart,
   RevenueTrendChart,
-} from "./components/ForecastCharts";
+} from "./ForecastCharts";
 
 type TabOverviewProps = {
   data: BusinessForecastData["overview"];

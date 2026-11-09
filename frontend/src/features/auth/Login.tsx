@@ -9,14 +9,14 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router";
-import DensoLogo from "../assets/Denso_logo.svg";
-import { Button } from "../components/Button";
-import { Input } from "../components/Input";
-import { API_ENDPOINTS, apiPost } from "../services/api";
+import DensoLogo from "../../assets/Denso_logo.svg";
+import { Button } from "../../components/Button";
+import { Input } from "../../components/Input";
+import { API_ENDPOINTS, apiPost } from "../../services/api";
 import type {
   AuthLoginRequest,
   AuthLoginResponse,
-} from "../services/types";
+} from "../../services/types";
 
 const Login = () => {
   const navigate = useNavigate();
