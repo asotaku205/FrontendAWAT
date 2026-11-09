@@ -7,6 +7,7 @@ import usePagination from "../../hooks/usePagination";
 import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
+import { ForecastComparisonChart } from "./components/ForecastCharts";
 
 type Decision = "Đã duyệt" | "Đã từ chối";
 type DecisionInfo = { decision: Decision; note: string };
@@ -89,19 +90,8 @@ const TabForecast = ({
 
       <div className="grid grid-cols-3 gap-4">
         <Panel title="Doanh thu: thực tế so với dự báo" className="col-span-2">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex gap-3 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-800" /> THỰC TẾ
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-300" /> DỰ BÁO
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center h-80 justify-center rounded-lg border-2 border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
-            Biểu đồ
-          </div>
+          <div className="mb-2 text-xs text-gray-500">Đơn vị: triệu đồng</div>
+          <ForecastComparisonChart data={data.revenueTrend} />
         </Panel>
 
         {/* Kịch bản dự báo */}

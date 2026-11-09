@@ -7,6 +7,7 @@ import usePagination from "../../hooks/usePagination";
 import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
+import { StockCoverageChart } from "./components/ForecastCharts";
 
 const TabStock = ({
   data,
@@ -82,9 +83,7 @@ const TabStock = ({
       <div className="grid grid-cols-3 gap-4">
         <Panel title="Số ngày đủ hàng theo nhóm" className="col-span-2 ">
           <div className="mb-3 text-xs text-gray-500">Mức an toàn: 14 ngày</div>
-          <div className="flex items-center h-80 justify-center rounded-lg border-2  border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
-            Biểu đồ
-          </div>
+          <StockCoverageChart data={data.coverageData} />
         </Panel>
 
         {/* Cần xử lý ngay */}

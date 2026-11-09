@@ -2,6 +2,11 @@ import { Button } from "../../components/ui/button";
 import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
+import {
+  ChannelRevenueChart,
+  OrderResultsChart,
+  RevenueTrendChart,
+} from "./components/ForecastCharts";
 
 type TabOverviewProps = {
   data: BusinessForecastData["overview"];
@@ -19,67 +24,40 @@ const TabOverview = ({ data, onTodoAction }: TabOverviewProps) => {
 
       <div className="grid grid-cols-3 gap-4">
         <Panel title="Doanh thu đơn hàng 14 ngày gần nhất" className="col-span-2">
-          <div className="mb-3 text-sm font-semibold text-gray-900"></div>
-          <div className="flex items-center h-80 justify-center rounded-lg border-2 border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
-            Biểu đồ
+          <RevenueTrendChart data={data.revenueTrend} />
+        </Panel>
+        <Panel title="Những việc cần làm">
+          <div className="space-y-3">
+            {data.todos.map((t) => (
+              <div key={t.rank} className="flex items-center gap-2 text-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
+                  {t.rank}
+                </span>
+                <span className="flex-1 text-gray-700">{t.text}</span>
+
+                <Button
+                  className="min-w-40"
+                  size="xs"
+                  onClick={() => onTodoAction(t.action)}
+                >
+                  {t.action}
+                </Button>
+              </div>
+            ))}
           </div>
         </Panel>
-          <Panel title="Những việc cần làm" >
-            <div className="space-y-3">
-              {data.todos.map((t) => (
-                <div key={t.rank} className="flex items-center gap-2 text-sm">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-700 text-xs font-bold text-white">
-                    {t.rank}
-                  </span>
-                  <span className="flex-1 text-gray-700">{t.text}</span>
-
-                  <Button
-                    key={t.rank}
-                    className="min-w-40"
-                    size="xs"
-                    onClick={() => onTodoAction(t.action)}
-                  >
-                    {t.action}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Panel title="Doanh thu theo kênh" >
-          
-          <div className="space-y-3">
-            {data.channelRevenue.map((c) => (
-              <div key={c.name}>
-                <div className="mb-1 flex justify-between text-xs">
-                  <span className="text-gray-700">{c.name}</span>
-                  <span className="font-semibold text-gray-900">
-                    {c.percent}%
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+        <Panel title="Doanh thu theo kênh">
+          <ChannelRevenueChart data={data.channelRevenue} />
         </Panel>
 
-         <Panel title="Hiệu quả đơn hàng" >
-          <div className="space-y-3">
-            {data.orderResults.map((o) => (
-              <div key={o.label}>
-                <div className="mb-1 flex justify-between text-xs">
-                  <span className="text-gray-700">{o.label}</span>
-                  <span className="font-semibold text-gray-900">{o.value}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+        <Panel title="Hiệu quả đơn hàng">
+          <OrderResultsChart data={data.orderResults} />
         </Panel>
 
         <Panel title="Sản phẩm nổi bật">
-         
           <div className="space-y-2.5">
             {data.featuredProducts.map((p) => (
               <div

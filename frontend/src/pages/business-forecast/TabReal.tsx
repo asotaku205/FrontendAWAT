@@ -6,6 +6,7 @@ import usePagination from "../../hooks/usePagination";
 import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
+import { HourlyRevenueChart } from "./components/ForecastCharts";
 const statusClass: Record<string, string> = {
   "Thành công": "bg-green-100 text-green-700",
   "Đang xử lý": "bg-yellow-100 text-yellow-700",
@@ -80,9 +81,8 @@ const TabReal = ({ data }: { data: BusinessForecastData["real"] }) => {
 
       <div className="grid grid-cols-3 gap-4">
         <Panel title="Doanh thu theo giờ hôm nay" className="col-span-2">
-          <div className="flex items-center h-80 justify-center rounded-lg border-2  border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
-            Biểu đồ
-          </div>
+          <div className="mb-2 text-xs text-gray-500">Đơn vị: triệu đồng</div>
+          <HourlyRevenueChart data={data.hourlyRevenue} />
         </Panel>
 
         <Panel title="Tín hiệu kinh doanh">

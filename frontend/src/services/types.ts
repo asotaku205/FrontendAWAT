@@ -372,6 +372,24 @@ export type ForecastKpi = {
 export type ForecastTodoItem = { rank: number; text: string; action: string };
 export type ForecastChannelRevenue = { name: string; percent: number };
 export type ForecastOrderResult = { label: string; value: number; color: string };
+export type ForecastDailyRevenue = { date: string; revenue: number };
+export type ForecastHourlyRevenue = { hour: string; revenue: number };
+export type ForecastRevenueForecastPoint = {
+  date: string;
+  actual: number | null;
+  forecast: number | null;
+};
+export type ForecastChannelCostRevenue = {
+  channel: string;
+  cost: number;
+  revenue: number;
+};
+export type ForecastStockCoverage = { product: string; days: number };
+export type ForecastCustomerTrend = {
+  date: string;
+  newCustomers: number;
+  returningCustomers: number;
+};
 export type ForecastFeaturedProduct = {
   code: string;
   name: string;
@@ -474,28 +492,33 @@ export type BusinessForecastData = {
   overview: {
     kpis: ForecastKpi[];
     todos: ForecastTodoItem[];
+    revenueTrend: ForecastDailyRevenue[];
     channelRevenue: ForecastChannelRevenue[];
     orderResults: ForecastOrderResult[];
     featuredProducts: ForecastFeaturedProduct[];
   };
   real: {
     kpis: ForecastKpi[];
+    hourlyRevenue: ForecastHourlyRevenue[];
     businessSignals: ForecastBusinessSignal[];
     recentOrders: ForecastRecentOrder[];
   };
   forecast: {
     kpis: ForecastKpi[];
+    revenueTrend: ForecastRevenueForecastPoint[];
     scenarioData: ForecastScenario[];
     productsToPrepare: ForecastProductToPrepare[];
     weeklyRisks: string[];
   };
   channel: {
     kpis: ForecastKpi[];
+    chartData: ForecastChannelCostRevenue[];
     channelsToOptimize: ForecastChannelOptimization[];
     efficiencyData: ForecastChannelEfficiency[];
   };
   stock: {
     kpis: ForecastKpi[];
+    coverageData: ForecastStockCoverage[];
     urgentStock: ForecastUrgentStock[];
     inventoryData: ForecastStockItem[];
     incomingSummary: {
@@ -505,6 +528,7 @@ export type BusinessForecastData = {
   };
   customer: {
     kpis: ForecastKpi[];
+    trendData: ForecastCustomerTrend[];
     actions: ForecastCustomerAction[];
     watchList: ForecastCustomerToWatch[];
     returnReasons: ForecastReturnReason[];

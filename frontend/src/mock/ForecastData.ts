@@ -39,6 +39,23 @@ export const overviewTodos: ForecastTodoItem[] = [
   { rank: 4, text: "LNV-03 tăng trưởng tốt", action: "Tăng tồn kho" },
 ];
 
+export const overviewRevenueTrend = [
+  { date: "27/10", revenue: 92 },
+  { date: "28/10", revenue: 105 },
+  { date: "29/10", revenue: 98 },
+  { date: "30/10", revenue: 118 },
+  { date: "31/10", revenue: 112 },
+  { date: "01/11", revenue: 126 },
+  { date: "02/11", revenue: 121 },
+  { date: "03/11", revenue: 134 },
+  { date: "04/11", revenue: 119 },
+  { date: "05/11", revenue: 142 },
+  { date: "06/11", revenue: 137 },
+  { date: "07/11", revenue: 151 },
+  { date: "08/11", revenue: 116 },
+  { date: "09/11", revenue: 128.4 },
+];
+
 export const overviewChannelRevenue: ForecastChannelRevenue[] = [
   { name: "TikTok Shop", percent: 42.8 },
   { name: "Shopee", percent: 28.6 },
@@ -85,12 +102,44 @@ export const realRecentOrders: ForecastRecentOrder[] = [
   { id: "DH-005", channel: "Website", product: "OIL-08", region: "Hà Nội", cod: "350.000", status: "Đơn hoàn", updated: "08:41" },
 ];
 
+export const realHourlyRevenue = [
+  { hour: "08:00", revenue: 4.2 },
+  { hour: "09:00", revenue: 8.6 },
+  { hour: "10:00", revenue: 12.4 },
+  { hour: "11:00", revenue: 10.8 },
+  { hour: "12:00", revenue: 7.3 },
+  { hour: "13:00", revenue: 9.7 },
+  { hour: "14:00", revenue: 14.1 },
+  { hour: "15:00", revenue: 11.6 },
+  { hour: "16:00", revenue: 16.8 },
+  { hour: "17:00", revenue: 13.2 },
+  { hour: "18:00", revenue: 10.4 },
+  { hour: "19:00", revenue: 6.9 },
+];
+
 export const forecastKpis: ForecastKpi[] = [
   { label: "Doanh thu dự báo", value: "1,456 tỷ", sub: "+14,2%" },
   { label: "Đơn hàng dự báo", value: "2.846", sub: "+16,8%" },
   { label: "Độ tin cậy", value: "92%", sub: "Cao" },
   { label: "Nguy cơ thiếu hàng", value: "8 sản phẩm", sub: "Cần chuẩn bị" },
   { label: "Kênh tăng trưởng", value: "TikTok", sub: "+24%" },
+];
+
+export const forecastRevenueTrend = [
+  { date: "03/11", actual: 119, forecast: null },
+  { date: "04/11", actual: 132, forecast: null },
+  { date: "05/11", actual: 126, forecast: null },
+  { date: "06/11", actual: 144, forecast: null },
+  { date: "07/11", actual: 138, forecast: 140 },
+  { date: "08/11", actual: 151, forecast: 146 },
+  { date: "09/11", actual: 128, forecast: 153 },
+  { date: "10/11", actual: null, forecast: 158 },
+  { date: "11/11", actual: null, forecast: 162 },
+  { date: "12/11", actual: null, forecast: 169 },
+  { date: "13/11", actual: null, forecast: 165 },
+  { date: "14/11", actual: null, forecast: 176 },
+  { date: "15/11", actual: null, forecast: 182 },
+  { date: "16/11", actual: null, forecast: 188 },
 ];
 
 export const forecastScenarioData: ForecastScenario[] = [
@@ -135,6 +184,14 @@ export const channelEfficiencyData: ForecastChannelEfficiency[] = [
   { channel: "Website", cost: "5,4 tr", revenue: "22,1 tr", efficiency: "3,7 lần", returnRate: "2,2%", growth: "+24%", suggestion: "Tăng thử nghiệm" },
 ];
 
+export const channelChartData = [
+  { channel: "Facebook", cost: 28.4, revenue: 96.2 },
+  { channel: "TikTok", cost: 12.3, revenue: 54.1 },
+  { channel: "Shopee", cost: 17.8, revenue: 45.6 },
+  { channel: "Lazada", cost: 8.1, revenue: 28.3 },
+  { channel: "Website", cost: 5.4, revenue: 22.1 },
+];
+
 export const warehouseKpis: ForecastKpi[] = [
   { label: "Tồn có thể dùng", value: "12.580", sub: "+6,2%" },
   { label: "Sản phẩm sắp hết", value: "24", sub: "+33%" },
@@ -158,12 +215,37 @@ export const stockInventoryData: ForecastStockItem[] = [
   { code: "BMS-02", name: "Body Milk", stock: "210", sold7d: "68", forecast14d: "96", daysLeft: "31 ngày", status: "Bình thường", action: "Xem" },
 ];
 
+export const stockCoverageData = [
+  { product: "LNV-03", days: 15 },
+  { product: "SER-04", days: 8 },
+  { product: "OIL-08", days: 5 },
+  { product: "COL-01", days: 27 },
+  { product: "BMS-02", days: 31 },
+];
+
 export const customerKpis: ForecastKpi[] = [
   { label: "Khách mới", value: "1.248", sub: "+18,6%" },
   { label: "Khách quay lại", value: "892", sub: "+12,3%" },
   { label: "Tỷ lệ xác nhận", value: "96,4%", sub: "+1,8%" },
   { label: "Tỷ lệ hoàn / hủy", value: "2,8%", sub: "-0,6%" },
   { label: "Khách rủi ro cao", value: "23", sub: "Cần theo dõi" },
+];
+
+export const customerTrendData = [
+  { date: "27/10", newCustomers: 68, returningCustomers: 42 },
+  { date: "28/10", newCustomers: 74, returningCustomers: 46 },
+  { date: "29/10", newCustomers: 71, returningCustomers: 49 },
+  { date: "30/10", newCustomers: 82, returningCustomers: 51 },
+  { date: "31/10", newCustomers: 78, returningCustomers: 54 },
+  { date: "01/11", newCustomers: 91, returningCustomers: 58 },
+  { date: "02/11", newCustomers: 85, returningCustomers: 61 },
+  { date: "03/11", newCustomers: 96, returningCustomers: 63 },
+  { date: "04/11", newCustomers: 88, returningCustomers: 65 },
+  { date: "05/11", newCustomers: 102, returningCustomers: 68 },
+  { date: "06/11", newCustomers: 98, returningCustomers: 72 },
+  { date: "07/11", newCustomers: 110, returningCustomers: 75 },
+  { date: "08/11", newCustomers: 94, returningCustomers: 77 },
+  { date: "09/11", newCustomers: 106, returningCustomers: 81 },
 ];
 
 export const customerActions: ForecastCustomerAction[] = [
@@ -247,28 +329,33 @@ export const businessForecastData: BusinessForecastData = {
   overview: {
     kpis: overviewKpis,
     todos: overviewTodos,
+    revenueTrend: overviewRevenueTrend,
     channelRevenue: overviewChannelRevenue,
     orderResults: overviewOrderResults,
     featuredProducts: overviewFeaturedProducts,
   },
   real: {
     kpis: realKpis,
+    hourlyRevenue: realHourlyRevenue,
     businessSignals,
     recentOrders: realRecentOrders,
   },
   forecast: {
     kpis: forecastKpis,
+    revenueTrend: forecastRevenueTrend,
     scenarioData: forecastScenarioData,
     productsToPrepare: forecastProductsToPrepare,
     weeklyRisks,
   },
   channel: {
     kpis: channelKpis,
+    chartData: channelChartData,
     channelsToOptimize,
     efficiencyData: channelEfficiencyData,
   },
   stock: {
     kpis: warehouseKpis,
+    coverageData: stockCoverageData,
     urgentStock,
     inventoryData: stockInventoryData,
     incomingSummary: {
@@ -278,6 +365,7 @@ export const businessForecastData: BusinessForecastData = {
   },
   customer: {
     kpis: customerKpis,
+    trendData: customerTrendData,
     actions: customerActions,
     watchList: customerWatchList,
     returnReasons,

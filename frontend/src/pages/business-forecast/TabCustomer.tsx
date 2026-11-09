@@ -7,6 +7,7 @@ import usePagination from "../../hooks/usePagination";
 import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
+import { CustomerTrendChart, ReturnReasonsChart } from "./components/ForecastCharts";
 
 const TabCustomer = ({
   data,
@@ -88,19 +89,7 @@ const TabCustomer = ({
 
       <div className="grid grid-cols-3 gap-4">
         <Panel title="Xu hướng khách hàng 14 ngày" className="col-span-2 ">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex gap-3 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-800" /> Khách mới
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-300" /> Quay lại
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center  h-80 justify-center rounded-lg border-2  border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
-            Biểu đồ
-          </div>
+          <CustomerTrendChart data={data.trendData} />
         </Panel>
 
         <Panel title="Nhóm khách cần theo dõi">
@@ -137,18 +126,7 @@ const TabCustomer = ({
         </Panel>
 
         <Panel title="Lý do hoàn phổ biến">
-          <div className="space-y-3">
-            {data.returnReasons.map((r) => (
-              <div key={r.reason}>
-                <div className="mb-1 flex justify-between text-xs">
-                  <span className="text-gray-700">{r.reason}</span>
-                  <span className="font-semibold text-gray-900">
-                    {r.percent}%
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ReturnReasonsChart data={data.returnReasons} />
         </Panel>
       </div>
 

@@ -7,6 +7,7 @@ import usePagination from "../../hooks/usePagination";
 import type { BusinessForecastData } from "../../services/types";
 import KpiCard from "./components/KpiCard";
 import Panel from "./components/Panel";
+import { ChannelCostRevenueChart } from "./components/ForecastCharts";
 const channelColumns: TableColumn<BusinessForecastData["channel"]["efficiencyData"][number]>[] = [
   { key: "channel", title: "Kênh" },
   { key: "cost", title: "Chi phí" },
@@ -66,19 +67,8 @@ const TabChannel = ({
 
       <div className="grid grid-cols-3 gap-4">
         <Panel title="Chi phí doanh thu theo kênh" className="col-span-2 ">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex gap-3 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-800" /> Doanh thu
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-gray-400" /> Chi phí
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center h-80 justify-center rounded-lg border-2 border-gray-300 bg-gray-50 px-4 text-center text-sm text-gray-400">
-            Biểu đồ
-          </div>
+          <div className="mb-2 text-xs text-gray-500">Đơn vị: triệu đồng</div>
+          <ChannelCostRevenueChart data={data.chartData} />
         </Panel>
 
         <Panel title="Kênh cần tối ưu">
