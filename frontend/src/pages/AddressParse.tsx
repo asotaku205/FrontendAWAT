@@ -1,12 +1,12 @@
-import ParsedAddress from "./address-parse/components/ParsedAddress";
-import PendingAddress from "./address-parse/components/PendingAddress";
-import SearchInput from "../components/ui/SearchInput";
+import ParsedAddress from "../features/address-parse/components/ParsedAddress";
+import PendingAddress from "../features/address-parse/components/PendingAddress";
+import SearchInput from "../components/SearchInput";
 import { useState } from "react";
-import { Button } from "../components/ui/button";
-import DateInput from "../components/ui/DateInput";
-import Filter from "../components/ui/Filter";
-import SelectOption from "../components/ui/SelectOption";
-import useApiData from "../hooks/useApiData";
+import { Button } from "../components/Button";
+import DateInput from "../components/DateInput";
+import Filter from "../components/Filter";
+import SelectOption from "../components/SelectOption";
+import useApiData from "../hooks/use-api-data";
 import { API_ENDPOINTS } from "../services/api";
 import type { AddressParseOptions } from "../services/types";
 

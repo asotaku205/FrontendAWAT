@@ -7,11 +7,11 @@ import Dashboard from "../pages/Dashboard";
 import DeliveryDate from "../pages/DeliveryDate";
 import Login from "../pages/Login";
 import OrderDistribution from "../pages/OrderDistribution";
-import Telesale from "../pages/telesale/Telesale";
-import ViewEmployeePage from "../pages/telesale/viewEmployeePage";
-import AssignmentPage from "../pages/telesale/AssignmentPage";
-import TelesaleOverview from "../pages/telesale/TelesaleOverview";
-import TelesaleCallDetail from "../pages/telesale/TelesaleCallDetail";
+import Telesale from "../features/telesale/Telesale";
+import ViewEmployeePage from "../features/telesale/viewEmployeePage";
+import AssignmentPage from "../features/telesale/AssignmentPage";
+import TelesaleOverview from "../features/telesale/TelesaleOverview";
+import TelesaleCallDetail from "../features/telesale/TelesaleCallDetail";
 
 const AppRouter = () => (
   <Routes>

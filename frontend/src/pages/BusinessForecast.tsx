@@ -1,14 +1,14 @@
 import { useState } from "react";
-import TabOverview from "./business-forecast/TabOverview";
-import TabReal from "./business-forecast/TabReal";
-import TabForecast from "./business-forecast/TabForecast";
-import TabChannel from "./business-forecast/TabChannel";
-import TabCustomer from "./business-forecast/TabCustomer";
-import TabStock from "./business-forecast/TabStock";
-import TabWarning from "./business-forecast/TabWarning";
-import TabActivity from "./business-forecast/TabActivity";
-import { Button } from "../components/ui/button";
-import useApiData from "../hooks/useApiData";
+import TabOverview from "../features/business-forecast/TabOverview";
+import TabReal from "../features/business-forecast/TabReal";
+import TabForecast from "../features/business-forecast/TabForecast";
+import TabChannel from "../features/business-forecast/TabChannel";
+import TabCustomer from "../features/business-forecast/TabCustomer";
+import TabStock from "../features/business-forecast/TabStock";
+import TabWarning from "../features/business-forecast/TabWarning";
+import TabActivity from "../features/business-forecast/TabActivity";
+import { Button } from "../components/Button";
+import useApiData from "../hooks/use-api-data";
 import { API_ENDPOINTS } from "../services/api";
 import type { BusinessForecastData } from "../services/types";
 

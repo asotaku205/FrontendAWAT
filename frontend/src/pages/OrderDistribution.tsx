@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { Button } from "../components/ui/button";
-import Table, { type TableColumn } from "../components/ui/Table";
-import useApiData from "../hooks/useApiData";
-import usePagination from "../hooks/usePagination";
+import { Button } from "../components/Button";
+import Table, { type TableColumn } from "../components/Table";
+import useApiData from "../hooks/use-api-data";
+import usePagination from "../hooks/use-pagination";
 import { API_ENDPOINTS } from "../services/api";
 import type {
   AuditLogRecord,
   DistributionRecommendation,
   PrintRequest,
 } from "../services/types";
-import AllOrder from "./order-distribution/components/AllOrder";
-import AssignProposalModal from "./order-distribution/components/AssignProposalModal";
-import EmployeesTab from "./order-distribution/components/EmployeesTab";
-import PrintOrderModal from "./order-distribution/components/PrintOrderModal";
-import ProcessTab from "./order-distribution/components/ProcessTab";
+import AllOrder from "../features/order-distribution/components/AllOrder";
+import AssignProposalModal from "../features/order-distribution/components/AssignProposalModal";
+import EmployeesTab from "../features/order-distribution/components/EmployeesTab";
+import PrintOrderModal from "../features/order-distribution/components/PrintOrderModal";
+import ProcessTab from "../features/order-distribution/components/ProcessTab";
 
 type OrderDistributionTab = "all" | "process" | "employees";
 

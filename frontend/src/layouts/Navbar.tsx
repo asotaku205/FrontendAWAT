@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import logo from "../assets/Denso_logo.svg";
-import { Button } from "../components/ui/button";
+import { Button } from "../components/Button";
 
 export type MenuItem = {
   title: string;

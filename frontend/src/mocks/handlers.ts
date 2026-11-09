@@ -7,7 +7,7 @@ import {
   PendingAddressData,
   reliabilityOptions,
   region,
-} from "../mock/AddressParseData";
+} from "./address-parse-data";
 import type {
   TelesaleAssignmentSummary as TelesaleAssignmentSummaryType,
   TelesaleCallRecord,
@@ -18,15 +18,15 @@ import type {
   TelesaleWorkSummary,
   PendingAddressDataType,
 } from "../services/types";
-import { AssignedOrderData } from "../mock/AssignedOrderData";
-import { AuditLogData } from "../mock/AuditLog";
-import { UnassignOrderData } from "../mock/UnassignOrderData";
-import { DeliveryOrderData } from "../mock/DeliveryOrderData";
-import { TelesaleData } from "../mock/TelesaleData";
-import { TelesaleCallData } from "../mock/TelesaleCallData";
-import { TelesaleEmployeeData } from "../mock/TelesaleEmployeeData";
-import { ProductData } from "../mock/ProductData";
-import { DashboardSummaryData } from "../mock/DashboardData";
+import { AssignedOrderData } from "./assigned-order-data";
+import { AuditLogData } from "./audit-log";
+import { UnassignOrderData } from "./unassign-order-data";
+import { DeliveryOrderData } from "./delivery-order-data";
+import { TelesaleData } from "./telesale-data";
+import { TelesaleCallData } from "./telesale-call-data";
+import { TelesaleEmployeeData } from "./telesale-employee-data";
+import { ProductData } from "./product-data";
+import { DashboardSummaryData } from "./dashboard-data";
 import {
   TelesaleAssignmentAgents,
   TelesaleAssignmentSummaryData,
@@ -34,7 +34,7 @@ import {
   TelesalePriorityOrders,
   TelesaleWorkSummaryData,
   TelesaleWorkOrders,
-} from "../mock/TelesaleAssignmentData";
+} from "./telesale-assignment-data";
 import {
   exceptionOrders,
   distributionRecommendation,
@@ -43,7 +43,7 @@ import {
   readyOrdersSummary,
   workerProgress,
   warehouseEmployees,
-} from "../mock/OrderDistributionData";
+} from "./order-distribution-data";
 import type {
   AuthLoginRequest,
   ApproveDistributionRequest,
@@ -54,8 +54,8 @@ import type {
   ReportEmployeeAbsenceRequest,
   AutoAssignOrdersResponse,
 } from "../services/types";
-import { BlacklistOrderData } from "../mock/BlacklistData";
-import { businessForecastData } from "../mock/ForecastData";
+import { BlacklistOrderData } from "./blacklist-data";
+import { businessForecastData } from "./forecast-data";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;

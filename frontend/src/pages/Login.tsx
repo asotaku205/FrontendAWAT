@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import DensoLogo from "../assets/Denso_logo.svg";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
 import { API_ENDPOINTS, apiPost } from "../services/api";
 import type {
   AuthLoginRequest,

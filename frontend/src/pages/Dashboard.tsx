@@ -1,7 +1,7 @@
 
-import Card from "../components/ui/Card";
-import Description from "../components/ui/Description";
-import useApiData from "../hooks/useApiData";
+import Card from "../components/Card";
+import Description from "../components/Description";
+import useApiData from "../hooks/use-api-data";
 import { API_ENDPOINTS } from "../services/api";
 import type { DashboardSummary } from "../services/types";
 

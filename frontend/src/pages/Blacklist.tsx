@@ -1,16 +1,16 @@
 import axios from "axios";
 import { useState } from "react";
-import { statusBadgeClass } from "../mock/BlacklistData";
+import { statusBadgeClass } from "../mocks/blacklist-data";
 import type { BlacklistOrder, BlacklistOrderStatus } from "../services/types";
-import usePagination from "../hooks/usePagination";
-import OrderDetailModal from "./Blacklist/OrderDetailModal";
-import type { TableColumn } from "../components/ui/Table";
-import Panel from "./business-forecast/components/Panel";
-import Table from "../components/ui/Table";
-import { Button } from "../components/ui/button";
+import usePagination from "../hooks/use-pagination";
+import OrderDetailModal from "../features/blacklist/OrderDetailModal";
+import type { TableColumn } from "../components/Table";
+import Panel from "../features/business-forecast/components/Panel";
+import Table from "../components/Table";
+import { Button } from "../components/Button";
 import { API_ENDPOINTS, apiPatch } from "../services/api";
-import useApiData from "../hooks/useApiData";
-import Modal from "../components/ui/Modal";
+import useApiData from "../hooks/use-api-data";
+import Modal from "../components/Modal";
 import type { BlacklistDecisionRequest } from "../services/types";
 
 const STATUS_FILTERS: ("all" | BlacklistOrderStatus)[] = [
