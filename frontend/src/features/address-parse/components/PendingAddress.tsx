@@ -1,20 +1,19 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../../components/Button";
 import usePagination from "../../../hooks/use-pagination";
-import useApiData from "../../../hooks/use-api-data";
 import { API_ENDPOINTS, apiPost } from "../../../services/api";
 import type {
   AddressParseDataType,
   AddressParseOrdersRequest,
   AddressParseOptions,
-  PendingAddressDataType,
 } from "../../../services/types";
 import AddressTable from "./AddressTable";
 import ParseAllModal from "./ParseAllModal";
 import ParseModal from "./ParseModal";
 import SelectionToolbar from "./SelectionToolbar";
-
+import type { PendingAddress as PendingAddressRecord } from "../../../services/generated/models";
+import { getPendingAddresses, parseSelectedAddresses } from "../api";
 const PendingAddress = ({
   addressOptions,
 }: {
@@ -26,8 +25,39 @@ const PendingAddress = ({
   const [processedIds, setProcessedIds] = useState<string[]>([]);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
-  const { data: pendingAddresses, error, isLoading } =
-    useApiData<PendingAddressDataType[]>(API_ENDPOINTS.addressParse.pending);
+  const [pendingAddresses, setPendingAddresses] = useState<
+    PendingAddressRecord[] | null
+  >(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadPendingAddresses() {
+      try {
+        const addresses = await getPendingAddresses(controller.signal);
+        setPendingAddresses(addresses);
+      } catch (requestError: unknown) {
+        if (controller.signal.aborted) return;
+
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Đã xảy ra lỗi khi tải dữ liệu.",
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadPendingAddresses();
+
+    return () => controller.abort();
+  }, []);
+
   const records = (pendingAddresses ?? []).filter(
     ({ orderCode }) => !processedIds.includes(orderCode),
   );
@@ -55,10 +85,7 @@ const PendingAddress = ({
     setParseError(null);
     setIsParsing(true);
     try {
-      await apiPost<AddressParseDataType[], AddressParseOrdersRequest>(
-        API_ENDPOINTS.addressParse.parse,
-        { orderCodes },
-      );
+      await parseSelectedAddresses(orderCodes);
       setProcessedIds((current) => [...new Set([...current, ...orderCodes])]);
       setSelectedIds([]);
       setShowParseModal(false);

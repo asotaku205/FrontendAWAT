@@ -1,0 +1,233 @@
+openapi: 3.1.0
+
+info:
+  title: AWAT API
+  version: 1.0.0
+  description: API cho ứng dụng AWAT Logistics
+
+tags:
+  - name: Auth
+  - name: AddressParse
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: authLogin
+      summary: Đăng nhập
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginRequest"
+      responses:
+        "200":
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthLoginResponse"
+        "400":
+          description: Request không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Email hoặc mật khẩu không chính xác
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /address-parse/pending:
+    get:
+      tags: [AddressParse]
+      operationId: listPendingAddresses
+      summary: Lấy danh sách địa chỉ chờ phân tách
+      responses:
+        "200":
+          description: Danh sách địa chỉ chờ phân tách
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PendingAddress"
+
+  /address-parse/parse:
+    post:
+      tags: [AddressParse]
+      operationId: parseAddresses
+      summary: Phân tách địa chỉ cho các đơn được chọn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParseAddressesRequest"
+      responses:
+        "200":
+          description: Kết quả phân tách
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AddressParseResult"
+        "400":
+          description: Danh sách mã đơn không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Không tìm thấy một hoặc nhiều đơn
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    AuthLoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+
+    AuthLoginResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - accessToken
+        - user
+      properties:
+        accessToken:
+          type: string
+        user:
+          type: object
+          additionalProperties: false
+          required:
+            - id
+            - email
+            - name
+            - role
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+              format: email
+            name:
+              type: string
+            role:
+              type: string
+
+    PendingAddress:
+      type: object
+      additionalProperties: false
+      required:
+        - orderCode
+        - customerName
+        - phoneNumber
+        - originalAddress
+        - dateCreated
+        - status
+      properties:
+        orderCode:
+          type: string
+        customerName:
+          type: string
+        phoneNumber:
+          type: string
+        originalAddress:
+          type: string
+        dateCreated:
+          type: string
+        status:
+          type: string
+          enum:
+            - Chờ phân tách
+
+    ParseAddressesRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - orderCodes
+      properties:
+        orderCodes:
+          type: array
+          minItems: 1
+          items:
+            type: string
+
+    AddressParseResult:
+      type: object
+      additionalProperties: false
+      required:
+        - orderCode
+        - customerName
+        - phoneNumber
+        - originalAddress
+        - city
+        - cityReliable
+        - district
+        - districtReliable
+        - region
+        - regionReliable
+        - detailedAddress
+        - dateCreated
+        - reliability
+        - status
+      properties:
+        orderCode:
+          type: string
+        customerName:
+          type: string
+        phoneNumber:
+          type: string
+        originalAddress:
+          type: string
+        city:
+          type: string
+        cityReliable:
+          type: number
+        district:
+          type: string
+        districtReliable:
+          type: number
+        region:
+          type: string
+        regionReliable:
+          type: number
+        detailedAddress:
+          type: string
+        dateCreated:
+          type: string
+        reliability:
+          type: number
+        status:
+          type: string
+          enum:
+            - Chưa xác nhận
+            - Đã xác nhận
+            - Lỗi phân tách
+
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
